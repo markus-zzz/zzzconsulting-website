@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "A LLVM exercise"
+title:  "A LLVM exercise [draft]"
 date:   2018-07-09 22:00:50 +0200
 categories: compiler llvm
 ---
@@ -118,6 +118,18 @@ for.end:                                          ; preds = %for.cond
   ret i32 %s.0
 }
 ```
-As can be seen the effect of the mem2reg pass is rather dramatic.
+As can be seen the effect of the mem2reg pass is rather dramatic. Gone are the
+useless variable loads and stores and alloca instructions.
 
-Now let's implement our own mem2reg pass (and call it ourmem2reg) and see if we can achieve similar results.
+Now let's implement our own mem2reg pass (and call it ourmem2reg) and see if we
+can achieve similar results. The algoritm we will use will be the classical one
+by Cytron et al. and the interested reader can find all the details in [1].
+
+Implemented in [OurMem2Reg.cpp]({{site.url}}/download/OurMem2Reg.cpp) will describe in
+details shortly.
+
+[1] Ron Cytron, Jeanne Ferrante, Barry K. Rosen, Mark N. Wegman, and F. Kenneth
+Zadeck. 1991. Efficiently computing static single assignment form and the
+control dependence graph. ACM Trans. Program. Lang. Syst. 13, 4 (October 1991),
+451-490. DOI=http://dx.doi.org/10.1145/115372.115320
+

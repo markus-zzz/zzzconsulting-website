@@ -8,15 +8,18 @@ So who am I? Well here is my resume.
 
 # Resume
 ## Personal profile
-Enthusiastic software engineer with 12+ years of industry experience. Professional interests range from compiler
-engineering, graphics programming, embedded software to digital architecture and design.
+Enthusiastic software engineer with 12+ years of industry experience.
+Professional interests range from compiler engineering, graphics programming,
+embedded software to digital architecture and design.
 
 ## Employment
 
-### Self employed
-November 2017 - Present
+### Supreme genius engineer<sup>1</sup> @ [ZZZ-Consulting](http://www.zzzconsulting.se)
+Location: Lund
 
-### Senior software engineer at [ARM](http://www.arm.com)
+Duration: November 2017 - Present
+
+### Senior software engineer @ [ARM](http://www.arm.com)
 Location: Lund
 
 Duration: August 2011 - November 2017
@@ -31,7 +34,7 @@ Main achievements:
 - Bug patrol
 - And a lot more
 
-### Software engineer [ST-Ericsson](http://www.ericsson.com)
+### Software engineer @ [ST-Ericsson](http://www.ericsson.com)
 Location: Lund
 
 Duration: September 2006 - July 2011
@@ -45,14 +48,14 @@ Main achievements:
 - Debugging tools for DSP cluster
 - Logging framework
 
-### Software developer at [Gambro](http://www.gambro.com)
+### Software developer @ [Gambro](http://www.gambro.com)
 Location: Lund
 
 Duration: August 2001 - June 2002
 
 Summary: Embedded software and USB communication
 
-### Software developer at [Axis Communications](http://www.axis.com)
+### Software developer @ [Axis Communications](http://www.axis.com)
 Location: Lund
 
 Duration: June 2000 - July 2001
@@ -94,3 +97,6 @@ Hiking, nature, rock climbing, slacklining, boardsports and natural movement in 
 
 ## References
 Given at request. 
+
+
+<sup>1</sup> Some job titles are quite ridiculous aren't they?
