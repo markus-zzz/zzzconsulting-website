@@ -2,7 +2,7 @@
 layout: post
 title:  "SSA based register allocation [draft]"
 date:   2018-07-15 16:00:50 +0200
-comments: true
+comments: false
 categories: compiler
 ---
 The task of register allocation is probably the most important optimization any
