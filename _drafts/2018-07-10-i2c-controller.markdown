@@ -6,3 +6,9 @@ categories: hardware rtl verilog
 ---
 
 Write some stuff about the implementation and simulation (vpi socket soft axi master)
+
+Write the following posts
+- Implementation
+- Simulation
+- Linux driver
+

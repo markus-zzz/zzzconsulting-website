@@ -1,0 +1,28 @@
+---
+layout: post
+title:  "SSA based register allocation [draft]"
+date:   2018-07-15 16:00:50 +0200
+comments: true
+categories: compiler
+---
+The task of register allocation is probably the most important optimization any
+compiler performs and unfortunately also one of the most complex ones. Some
+years ago there was a lot of interest in SSA based register allocation
+techniques since it would seem that the SSA form allows for a more straight
+forward treatment of the problem.
+
+Years ago I read this article (not sure if it was ever published but anyway
+here is a copy) about the implementation of a SSA based register allocator.
+Later on I then went ahead and implemented a version of it in my own very basic
+prototype compiler. Doing so led to some interesting insights (they were for me
+at least) that I am going to try to write down here in this post.
+
+Let us start by introducing our running example for this post.
+
+diamond and a loop should be enough right?
+
+if there are no constraints whatsoever.
+
+but there always are.
+
+it is all about the register file permutations.

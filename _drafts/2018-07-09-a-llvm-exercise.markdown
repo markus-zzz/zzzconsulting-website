@@ -2,6 +2,7 @@
 layout: post
 title:  "An LLVM exercise [draft]"
 date:   2018-07-09 22:00:50 +0200
+comments: true
 categories: compiler llvm
 ---
 
@@ -251,7 +252,14 @@ That however was not the purpose of this post but rather to provide an exercise
 to familiarize oneself with the LLVM API using a somewhat real example doing
 something useful.
 
-Did you like this post? Questions or feedback - send me a mail and let me know!
+In fact there is one issue if a variable is used before it is defined (e.g. not
+initializing the summation variable in the example above) will result in a
+compiler crash. Of course using a variable before it is defined is hardly good
+practice but the pass should still handle it correctly. Fixing this is left as
+an exercise for the reader but it is simply a matter of inserting a undef
+instruction if we encounter a use while the definition stack is empty.
+
+Did you like this post? Questions or feedback - leave a comment below!
 
 ## References
 
@@ -262,3 +270,4 @@ control dependence graph. ACM Trans. Program. Lang. Syst. 13, 4 (October 1991),
 
 [2] Cooper, Keith & Harvey, Timothy & Kennedy, Ken. (2006). A Simple, Fast
 Dominance Algorithm. Rice University, CS Technical Report 06-33870.
+
