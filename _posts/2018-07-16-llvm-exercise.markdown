@@ -1,7 +1,6 @@
 ---
 layout: post
-title:  "An LLVM exercise [draft]"
-date:   2018-07-09 22:00:50 +0200
+title:  "An LLVM exercise"
 comments: true
 categories: compiler llvm
 ---
