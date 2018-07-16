@@ -2,6 +2,7 @@
 layout: post
 title:  "A recruitment problem"
 date:   2018-07-08 14:00:50 +0200
+comments: false
 categories: jekyll update
 ---
 ## Welcome

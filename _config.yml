@@ -19,7 +19,7 @@ description: >- # this means to ignore newlines until "baseurl:"
   Consulting services offered in the fields of Compiler engineering, Graphics
   programming and Embedded computing.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://www.zzzconsulting.se" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  markus-zzz
 
 # Build settings
