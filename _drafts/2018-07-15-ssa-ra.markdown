@@ -11,11 +11,12 @@ years ago there was a lot of interest in SSA based register allocation
 techniques since it would seem that the SSA form allows for a more straight
 forward treatment of the problem.
 
-Years ago I read this article (not sure if it was ever published but anyway
-here is a copy) about the implementation of a SSA based register allocator.
-Later on I then went ahead and implemented a version of it in my own very basic
-prototype compiler. Doing so led to some interesting insights (they were for me
-at least) that I am going to try to write down here in this post.
+Some fewer years ago I read this article (not sure if it was ever published but
+anyway here is a copy) about the implementation of a SSA based register
+allocator.  Later on I then went ahead and implemented a version of it in my
+own very basic prototype compiler. Doing so led to some interesting insights
+(they were for me at least) that I am going to try to write down here in this
+post.
 
 Let us start by introducing our running example for this post.
 
