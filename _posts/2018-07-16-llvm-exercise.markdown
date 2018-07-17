@@ -14,12 +14,12 @@ this very pass in a different compiler framework.
 
 ## Background
 One interesting thing about LLVM is the approach to entering SSA-form (i.e.
-satisfying the static single assignment condition and placement of phi-nodes).
-Traditionally this is considered the front end responsibility to place phi-nodes
+satisfying the static single assignment condition by placement of phi-nodes).
+Traditionally this is considered a front end responsibility to place phi-nodes
 but LLVM however takes a different approach. Namely have the front end generate
 loads and stores for each variable access. Note that technically speaking this
 code is already in SSA form (it is just that it is terribly inefficient). Later
-on the pass mem2reg comes along and optimizes this effectively removing almost
+on the pass *mem2reg* comes along and optimizes this effectively removing almost
 all memory accesses for these variables.
 
 This is nice because it makes the front end simple, it can focus on its AST to
@@ -54,7 +54,7 @@ ninja install
 ```
 
 ## Experiment
-Let us start by looking at the LLVM IR before and after mem2reg for the following example
+Let us start by looking at the LLVM IR before and after *mem2reg* for the following example
 
 ```c
 int sum(int *data, int len)
@@ -111,7 +111,7 @@ for.end:                                          ; preds = %for.cond
   ret i32 %7
 }
 ```
-Then running the standard mem2reg pass on this IR
+Then running the standard *mem2reg* pass on this IR
 ```
 opt -passes mem2reg -S sum.ll -o sum-mem2reg.ll
 ```
@@ -141,11 +141,11 @@ for.end:                                          ; preds = %for.cond
   ret i32 %s.0
 }
 ```
-As can be seen the effects of the mem2reg pass are rather dramatic. Gone are the
+As can be seen the effects of the *mem2reg* pass are rather dramatic. Gone are the
 inefficient variable *loads*, *stores* and *alloca* instructions.
 
 ## Implement our own
-Now let's implement our own mem2reg pass (and call it ourmem2reg) and see if we
+Now let's implement our own *mem2reg* pass (and call it *ourmem2reg*) and see if we
 can achieve similar results. The algoritm we will use will be the classical one
 by Cytron et al. and the interested reader can find all the details in [1].
 
@@ -210,7 +210,7 @@ Running the optimizer with our pass loaded as a module
 opt -load $ROOT/build/lib/LLVMOurMem2Reg.so -ourmem2reg -S sum.ll -o sum-ourmem2reg.ll
 ```
 giving us the following result which looks rather identical to what we get with
-the stock mem2reg pass
+the stock *mem2reg* pass
 ```
 define arm_aapcs_vfpcc i32 @sum(i32* %data, i32 %len) #0 {
 entry:
