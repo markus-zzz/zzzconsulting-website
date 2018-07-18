@@ -28,6 +28,8 @@ theme: minima
 plugins:
   - jekyll-feed
 
+google_analytics: UA-122494618-1
+
 disqus:
   shortname: www-zzzconsulting-se
 

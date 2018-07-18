@@ -55,6 +55,30 @@ sending the appropriate command packet over the socket and by so we have
 achieved a reasonable separation between our simulation environment and the bus
 interface to it.
 
+The attentive reader might realise that the approach of having the RTL
+simulator block on a socket inside the value change callback for the AXI clock
+will effectively block the simulation unless it is constantly being fed with
+command packets over the socket. As a lucky coincidence this stream of socket
+commands is exactly what happens in the test suite used in this post as it
+constantly busy waits after each write to the control register.
+
+Later on though when we use QEMU and a proper interrupt driven device driver
+this will present a problem so we might as well try to solve it now. On the
+opposite side of blocking we could do the receive in non-blocking mode and
+effectively have the RTL simulation running at full speed all the time. While
+this would be functionally correct it is somewhat undesirable since it would be
+a huge wast of simulation cycles (and possibly producing some huge dump.vcd
+files).
+
+A better approach is to do a bit of both with the concept of a clock request
+signal from the block (we can use the busy bit of the status register for this
+purpose). While the block is busy it needs a clock to finish (and become ready)
+and in this state we use a non-blocking receive. On the other hand when the
+block is ready it is safe to fall back on blocking receives as there is no work
+to do until we get a command from the AXI.
+
+The code for this post series is found [here](https://github.com/markus-zzz/i2c-controller).
+
 To try it all out follow the instructions below
 ```
 git clone https://github.com/markus-zzz/i2c-controller

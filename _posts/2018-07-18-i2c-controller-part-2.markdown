@@ -31,9 +31,13 @@ To register our device we need to add the following line to the
 ```
 sysbus_create_simple("axi_master_client_device", 0x1e00b000, NULL);
 ```
-For the actual implementation of our device (in our repository the file
-*qemu/axi_master_client_device.c*) I simply sym-linked to it, and remembered to
-update the *hw/arm/Makefile.objs* so that it gets built.
+For the actual implementation of our device
+([axi_master_client_device.c](https://github.com/markus-zzz/i2c-controller/blob/master/qemu/axi_master_client_device.c))
+I simply sym-linked to it, and remembered to update the *hw/arm/Makefile.objs*
+so that it gets built. As can be seen adding a memory mapped device to an ARM
+based QEMU system turned out to be rather straight forward and all we really
+needed to do was to implement one hook for memory reads and one hook for memory
+writes to our region.
 
 ## Prepare the Linux system
 Second we are going to go ahead and build a complete little Linux system
@@ -44,7 +48,7 @@ you will see shortly.
 Before we do anything we need to make sure that we have a usable cross compiler
 for our intended target. I grabbed a pre-built one from
 [here](https://releases.linaro.org/components/toolchain/binaries/latest-6/arm-linux-gnueabihf/).
-Then we need to acquire build the kernel sources
+Then we need to acquire and build the kernel sources
 ```
 wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.17.8.tar.xz
 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm vexpress_defconfig
@@ -66,7 +70,7 @@ mount -t proc none /proc
 mount -t sysfs none /sys
 /sbin/mdev -s
 ```
-and finally create the FS image
+and finally create the file system image
 ```
 find . -print0 | cpio --null -ov --format=newc   | gzip -9 > ../initramfs.cpio.gz
 ```
@@ -120,7 +124,8 @@ well in the preivous post so we can delay further testing of that until the
 next post where we implement a proper device driver.
 
 ## Wrap up
-That concludes todays post.
+That concludes todays post. As always the interesting details are in the code
+so be sure to look at it.
 
 Did you like this post? Questions or feedback - leave a comment below!
 
