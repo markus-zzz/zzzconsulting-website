@@ -5,12 +5,12 @@
 layout: home
 ---
 
-# Hello and welcome! 
+# Hello and welcome!
 
 My name is Markus Lavin and by profession I am a software engineer, one who is
 located and active in the very south of Sweden. I intend to use this space to
 advertise myself as an independent consultant under the flag of my one man
-company *ZZZ-Consulting*. 
+company *ZZZ-Consulting*.
 
 For me the most efficient way to do this, I imagine, is to simply write about
 things I have done in the past. Over the years, besides being employed, I have

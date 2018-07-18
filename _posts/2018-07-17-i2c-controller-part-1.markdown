@@ -1,8 +1,7 @@
 ---
 layout: post
-title:  "Implementing a basic I2C controller"
-date:   2018-07-09 22:00:50 +0200
-comments: false
+title:  "A basic I2C controller - part 1"
+comments: true
 categories: hardware rtl verilog i2c
 ---
 
