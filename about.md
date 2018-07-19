@@ -65,7 +65,7 @@ Summary: Embedded Linux and USB host device driver
 ## Projects (outside of work)
 - Various FPGA constructions (mostly a VLIW DSP and a multithreaded CPU)
 - Prototype C compiler to evaluate code generation techniques
-- Graphics engine (first based on OpenGL then Vulkan) 
+- Graphics engine (first based on OpenGL then Vulkan)
 
 ## Skills / expertise
 
@@ -96,7 +96,9 @@ Master's thesis in numerical analysis
 Hiking, nature, rock climbing, slacklining, boardsports and natural movement in general.
 
 ## References
-Given at request. 
+Given at request.
 
 
-<sup>1</sup> Some job titles are quite ridiculous aren't they?
+<sup>1</sup> Well since it is my company I can assign myself this ridiculous
+title. On a more serious note though I do find that job titles are rather
+meaningless and often times arbitrarily assigned.

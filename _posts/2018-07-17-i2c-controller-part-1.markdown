@@ -4,16 +4,31 @@ title:  "A basic I2C controller - part 1"
 comments: true
 categories: hardware rtl verilog i2c
 ---
+## Introduction
+I2C is this two wire bus protocol that is very common in the embedded sphere
+and the reader is most likely already familiar with it.  As the name suggests
+it is a protocol for communicating between ICs and the specification for the
+protocol can be found
+[here](http://cache.nxp.com/documents/user_manual/UM10204.pdf).  The two wires
+consist of a clock (SCL) and a data (SDA), the master is responsible for
+initiating all transactions. Since it is a bit more complicated than just a
+shift-register there are special rules for when *SDA* transitions may occur
+with respect to *SCL* (i.e. not just data sampled at rising edge of clk end of
+story). For example:
 
-For a recent project I needed to interface the audio codec on a ZedBoard to
-generate a sine wave. The codec had quite an extensive set of registers that
-needed to be configured before it was willing to output any sound at all and
-these registers were of course accessible to the FPGA via the I2C two wire bus
-protocol. Now I2C isn't all that complicated, and the register writes were only
-needed at startup, so you could get away with a simple software implementation
-using GPIOs. However I thought it would be neater to implement an actual
-controller block in the FPGA and connect that to the AXI bus.
+- A SDA 1 -> 0 transition when SCL is high signals a START condition
+- A SDA 0 -> 1 transition when SCL is high signals a STOP condition
+- SDA transitions when SCL is low are used for normal data signaling
 
+Of course there are a bit more details to it but you can read about these in
+the spec above.
+
+In this post we are going to outline the RTL (Verilog) implementation and
+simulation of a basic I2C controller that connects to a host as an AXI slave. In
+future posts we will connect the simulation with QEMU and finish it all up by
+writing a Linux device driver.
+
+## Implementation
 After some thinking I decided that the AXI interface of my simple I2C
 controller should expose these two registers:
 
@@ -34,15 +49,40 @@ controller should expose these two registers:
 |ack|1|Acknowledge status for last transaction|
 |byte|8|Data byte read if last transaction was read (we always sample data even if we are driving SDA ourselves)|
 
+If one thinks a bit more about the signaling one realises that dividing the SCL
+into four phases might be a good idea so we use a clock enable scheme as
+follows:
+
+```
+// I2C clocking scheme
+//
+//        -+                             +-----------------------------+
+// SCL     |                             |                             |
+//         +-----------------------------+                             +-
+//
+//        -+            +-+            +-+            +-+            +-+
+// 4x_en   |            | |            | |            | |            | |
+//         +------------+ +------------+ +------------+ +------------+ +-
+//
+// phase      2'b00          2'b01          2'b10          2'b11
+```
+The implementation of the controller is
+[here](https://github.com/markus-zzz/i2c-controller/blob/master/i2c_controller.v).
+
+Next thing we need to wrap an AXI slave interface around the controller and
+that can be seen
+[here](https://github.com/markus-zzz/i2c-controller/blob/master/i2c_axi_slave.v).
+
+## Simulation
 For testing I found this
 [this](https://github.com/olofk/i2c/blob/master/bench/verilog/i2c_slave_model.v)
 slave model of a I2C EPROM.
 
-Now since the interface is AXI writing a testbench for this in verilog seemed
-like a pain and it would be much easier if we could generate the AXI register
-writes (and reads) from plain C code. Luckily it is rather easy to interface
-a Verilog simulator with your favorite programming language (C of
-course) by using VPI (Verilog Procedural Interface).
+Now if you think about the amount of AXI signaling that would be required to
+write and read something from the EPROM model you quickly realise that it would
+be a pain to write all that in plain Verilog. In fact it would be much easier
+if we could write all this in a programming language like C and luckily thanks
+to VPI (Verilog Procedural Interface) this is a straight forward task.
 
 Using VPI we connect a callback on value change events for the AXI clock signal
 and from there we can manipulate the remainder of the bus signals. We have a
@@ -60,7 +100,8 @@ simulator block on a socket inside the value change callback for the AXI clock
 will effectively block the simulation unless it is constantly being fed with
 command packets over the socket. As a lucky coincidence this stream of socket
 commands is exactly what happens in the test suite used in this post as it
-constantly busy waits after each write to the control register.
+constantly busy-waits on the status register after each write to the control
+register.
 
 Later on though when we use QEMU and a proper interrupt driven device driver
 this will present a problem so we might as well try to solve it now. On the

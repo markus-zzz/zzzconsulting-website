@@ -68,6 +68,7 @@ put the following lines in etc/init.d/rcS
 #!/bin/sh
 mount -t proc none /proc
 mount -t sysfs none /sys
+mount -t debugfs none /sys/kernel/debug/
 /sbin/mdev -s
 ```
 and finally create the file system image
