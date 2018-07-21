@@ -69,6 +69,7 @@ put the following lines in etc/init.d/rcS
 mount -t proc none /proc
 mount -t sysfs none /sys
 mount -t debugfs none /sys/kernel/debug/
+echo /sbin/mdev > /proc/sys/kernel/hotplug
 /sbin/mdev -s
 ```
 and finally create the file system image
@@ -77,7 +78,7 @@ find . -print0 | cpio --null -ov --format=newc   | gzip -9 > ../initramfs.cpio.g
 ```
 Could use status register busy bit as clock request for simulation? Meaning
 that as long as we have clock request the i2c controller keeps running
-regardless if we have something to recv from the socket or not.
+regardless if we have something to receive from the socket or not.
 
 ## Testing
 
@@ -96,8 +97,8 @@ the BusyBox shell.
 ### The QEMU and AXI part
 BusyBox has a very convenient utility command called *devmem* that allows us to
 access physical memory addresses without the hassle of having to write a kernel
-module at this point (or having to write a custom user space program to fiddle
-with */dev/mem* for that matter sice that is exactly what *devmem* is).
+module at this point, or having to write a custom user space program to fiddle
+with */dev/mem* for that matter (since that is exactly what *devmem* does).
 
 The AXI slave of our I2C controller implements a few dummy registers (they can
 be written and read but serve no other purpose) that we can use to verify our
@@ -126,7 +127,7 @@ next post where we implement a proper device driver.
 
 ## Wrap up
 That concludes todays post. As always the interesting details are in the code
-so be sure to look at it.
+so be sure to check it out.
 
 Did you like this post? Questions or feedback - leave a comment below!
 

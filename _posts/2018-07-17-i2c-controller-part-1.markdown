@@ -6,22 +6,22 @@ categories: hardware rtl verilog i2c
 ---
 ## Introduction
 I2C is this two wire bus protocol that is very common in the embedded sphere
-and the reader is most likely already familiar with it.  As the name suggests
-it is a protocol for communicating between ICs and the specification for the
-protocol can be found
+and the reader is most likely already familiar with it so the introduction here
+will be brief.  As the name suggests it is a protocol for communicating between
+ICs and the specification for the protocol can be found
 [here](http://cache.nxp.com/documents/user_manual/UM10204.pdf).  The two wires
 consist of a clock (SCL) and a data (SDA), the master is responsible for
 initiating all transactions. Since it is a bit more complicated than just a
 shift-register there are special rules for when *SDA* transitions may occur
-with respect to *SCL* (i.e. not just data sampled at rising edge of clk end of
-story). For example:
+with respect to *SCL* (i.e. not just data sampled at rising edge of clk
+end-of-story). For example:
 
 - A SDA 1 -> 0 transition when SCL is high signals a START condition
 - A SDA 0 -> 1 transition when SCL is high signals a STOP condition
 - SDA transitions when SCL is low are used for normal data signaling
 
-Of course there are a bit more details to it but you can read about these in
-the spec above.
+Of course there are more details to it but you can read all about those in the
+spec above.
 
 In this post we are going to outline the RTL (Verilog) implementation and
 simulation of a basic I2C controller that connects to a host as an AXI slave. In
@@ -66,6 +66,11 @@ follows:
 //
 // phase      2'b00          2'b01          2'b10          2'b11
 ```
+In other words we use the same clock domain as the AXI bus and 'divide' the clock
+locally by producing a clock enable signal with four pulses per *SCL* period. For
+each pulse we increment the two bit phase counter that is used by the remainder
+of the design.
+
 The implementation of the controller is
 [here](https://github.com/markus-zzz/i2c-controller/blob/master/i2c_controller.v).
 
@@ -74,7 +79,7 @@ that can be seen
 [here](https://github.com/markus-zzz/i2c-controller/blob/master/i2c_axi_slave.v).
 
 ## Simulation
-For testing I found this
+For testing I found 
 [this](https://github.com/olofk/i2c/blob/master/bench/verilog/i2c_slave_model.v)
 slave model of a I2C EPROM.
 

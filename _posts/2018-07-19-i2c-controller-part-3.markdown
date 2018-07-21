@@ -35,3 +35,11 @@ build it as
 ```
 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm -C $ROOT/linux M=${PWD} modules
 ```
+
+It turns out that getting an interrupt mapped through Linux in modern days is a
+bit more difficult than I expected. Seemingly to get this machinery to play
+along nicely with us we will have to do it the real proper way using the
+*platform device* framework and adding *device tree (DTS)* entries. Doing so
+will frankly require a bit of read up on my part so we will postpone that to
+the next post in this series. For now let's just do it the busy-wait way and
+verify that everything works.

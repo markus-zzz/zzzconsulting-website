@@ -101,4 +101,4 @@ Given at request.
 
 <sup>1</sup> Well since it is my company I can assign myself this ridiculous
 title. On a more serious note though I do find that job titles are rather
-meaningless and often times arbitrarily assigned.
+meaningless and often times arbitrarily applied.

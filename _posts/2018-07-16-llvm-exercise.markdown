@@ -7,29 +7,29 @@ categories: compiler llvm
 
 Let's write an LLVM optimization pass to familiarize ourselves with the
 environment. Of course LLVM already does everything even remotely interesting
-so in order to have some non-trivial example (or non-stupid if you will) we are
-going to replace an existing pass. The pass of choice is going to be *mem2reg*
-mainly because it is quite central and I happen to have experience implementing
-this very pass in a different compiler framework.
+so in order to have some non-trivial example we are going to replace an
+existing pass. The pass of choice is going to be *mem2reg* mainly because it is
+quite central and I happen to have experience implementing this very pass in a
+different compiler framework.
 
 ## Background
-One interesting thing about LLVM is the approach to entering SSA-form (i.e.
+One interesting thing about LLVM is its approach to entering SSA-form (i.e.
 satisfying the static single assignment condition by placement of phi-nodes).
 Traditionally this is considered a front end responsibility to place phi-nodes
-but LLVM however takes a different approach. Namely have the front end generate
-loads and stores for each variable access. Note that technically speaking this
-code is already in SSA form (it is just that it is terribly inefficient). Later
-on the pass *mem2reg* comes along and optimizes this effectively removing almost
-all memory accesses for these variables.
+but LLVM takes a different approach. Namely have the front end generate an
+alloca for each variable then loads for the uses and stores for the defs.  Note
+that technically speaking this code is already in SSA form (it is just that it
+is terribly inefficient). Later on the pass *mem2reg* comes along and optimizes
+this effectively removing the inefficient memory accesses for these variables.
 
-This is nice because it makes the front end simple, it can focus on its AST to
+This is nice because it makes the front end simpler, it can focus on its AST to
 IR translation without additional complexities. On the downside you could argue
-that it makes the compilation process inefficient because you have the front end
-generate a bunch of IR that will almost immediately be optimized away in the
-middle end (and I have witnessed some horrible cases of this). In my opinion
-though that is the name of the game in compiler engineering, to not worrying
-about everything at once but instead have each part do one thing well and have
-an efficient IR and infrastructure that allows for cheap IR updates.
+that it makes the compilation process inefficient because you have the front
+end generate a bunch of IR that will almost immediately be optimized away in
+the middle end. In my opinion though that is the name of the game in compiler
+engineering, to not worrying about everything at once but instead have each
+part do one thing well and have an efficient IR infrastructure that allows for
+cheap IR updates.
 
 ## Prerequisites
 To follow along you will need to have an LLVM development environment setup.
@@ -187,7 +187,7 @@ The driver of the pass
 
 1. In the previous step we took note of in which blocks there were definitions
    of the variable. Now we need to insert phi-nodes in the dominance frontier
-of these blocks (and keeping in mind that when we a insert a phi-node that acts
+of these blocks (and keeping in mind that when we insert a phi-node that acts
 as a new definition so we need to insert a phi-node in the dominance frontier
 of that block as well). In other words we need to insert phi-nodes in the
 iterated dominance frontier of the original definition blocks.  Luckily LLVM
@@ -238,7 +238,8 @@ for.end:                                          ; preds = %for.cond
 ```
 
 ## Wrap up
-So what have we touched in this exercise?
+So what areas of the LLVM infrastructure have we familiarized ourselves with in
+this exercise?
 - Traversing the CFG
 - Traversing the SSA graph (looking for uses of an instruction)
 - Requesting a dominator tree and traversing it

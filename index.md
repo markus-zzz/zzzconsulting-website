@@ -27,4 +27,4 @@ happen to be what I plan to write about.
 
 If you want to hire me to do any of those things then I am available locally in
 the Lund/Malmo region of Sweden and remotely anywhere. Send a mail to info
-address below and we will see if we can work something out!
+address below and let us see if we can work something out!
