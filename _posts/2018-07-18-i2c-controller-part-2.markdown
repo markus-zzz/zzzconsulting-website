@@ -32,7 +32,7 @@ To register our device we need to add the following line to the
 sysbus_create_simple("axi_master_client_device", 0x1e00b000, NULL);
 ```
 For the actual implementation of our device
-([axi_master_client_device.c](https://github.com/markus-zzz/i2c-controller/blob/master/qemu/axi_master_client_device.c))
+([qemu/axi_master_client_device.c](https://github.com/markus-zzz/i2c-controller/blob/master/qemu/axi_master_client_device.c))
 I simply sym-linked to it, and remembered to update the *hw/arm/Makefile.objs*
 so that it gets built. As can be seen adding a memory mapped device to an ARM
 based QEMU system turned out to be rather straight forward and all we really
@@ -76,9 +76,6 @@ and finally create the file system image
 ```
 find . -print0 | cpio --null -ov --format=newc   | gzip -9 > ../initramfs.cpio.gz
 ```
-Could use status register busy bit as clock request for simulation? Meaning
-that as long as we have clock request the i2c controller keeps running
-regardless if we have something to receive from the socket or not.
 
 ## Testing
 

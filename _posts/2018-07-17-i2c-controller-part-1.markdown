@@ -71,15 +71,15 @@ locally by producing a clock enable signal with four pulses per *SCL* period. Fo
 each pulse we increment the two bit phase counter that is used by the remainder
 of the design.
 
-The implementation of the controller is
-[here](https://github.com/markus-zzz/i2c-controller/blob/master/i2c_controller.v).
+The implementation of the controller is in
+[i2c_controller.v](https://github.com/markus-zzz/i2c-controller/blob/master/i2c_controller.v).
 
 Next thing we need to wrap an AXI slave interface around the controller and
-that can be seen
-[here](https://github.com/markus-zzz/i2c-controller/blob/master/i2c_axi_slave.v).
+that can be seen in
+[i2c_axi_slave.v](https://github.com/markus-zzz/i2c-controller/blob/master/i2c_axi_slave.v).
 
 ## Simulation
-For testing I found 
+For testing I found
 [this](https://github.com/olofk/i2c/blob/master/bench/verilog/i2c_slave_model.v)
 slave model of a I2C EPROM.
 
@@ -123,7 +123,8 @@ and in this state we use a non-blocking receive. On the other hand when the
 block is ready it is safe to fall back on blocking receives as there is no work
 to do until we get a command from the AXI.
 
-The code for this post series is found [here](https://github.com/markus-zzz/i2c-controller).
+The code for this post series can be found in
+[https://github.com/markus-zzz/i2c-controller](https://github.com/markus-zzz/i2c-controller).
 
 To try it all out follow the instructions below
 ```
