@@ -148,13 +148,25 @@ block is ready it is safe to fall back on blocking receives as there is no work
 to do until we get a command from the AXI.
 
 
-To try it all out follow the instructions below
+To try it all out simply do
 ```
 cd $ZZZ_ROOT/i2c-controller
 ./build-all.sh
 ./run-all.sh
 ```
+If all went well this should have executed the test code in
+[axi_master_client.c](https://github.com/markus-zzz/i2c-controller/blob/master/axi_master_client.c)
+writing patterns to the I2C connected memory and then reading back and
+verifying.
+
+To really see what is going on this might be a good opertunity to bring up the
+waveform viewer and inspect the signals in *tb.dut*
+```
+gtkwave dump.vcd
+```
 
 In the next post we try to integrate our socket based model with QEMU and later
 on in a third post we will attempt to write a Linux device driver for the
 EPROM.
+
+Did you like this post? Questions or feedback - leave a comment below!

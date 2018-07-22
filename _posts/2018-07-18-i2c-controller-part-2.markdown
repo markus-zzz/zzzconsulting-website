@@ -52,6 +52,7 @@ Then we need to acquire and build the kernel sources
 cd $ZZZ_ROOT
 wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.17.8.tar.xz
 tar xf linux-4.17.8.tar.xz
+ln -s linux-4.17.8 linux
 cd $ZZZ_ROOT/linux
 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm vexpress_defconfig
 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm -j8
@@ -60,9 +61,12 @@ After that BusyBox
 ```
 cd $ZZZ_ROOT
 wget http://busybox.net/downloads/busybox-1.29.1.tar.bz2
-make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm vdefconfig
-make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm vmenuconfig (enable static link option)
-make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm vinstall
+tar xf busybox-1.29.1.tar.bz2
+ln -s busybox-1.29.1 busybox
+cd $ZZZ_ROOT/busybox
+make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm defconfig
+make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm menuconfig (enable static link option)
+make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm -j8 install
 cd _install
 mkdir proc sys dev etc etc/init.d
 ```
@@ -75,9 +79,15 @@ mount -t debugfs none /sys/kernel/debug/
 echo /sbin/mdev > /proc/sys/kernel/hotplug
 /sbin/mdev -s
 ```
-and finally create the file system image
+and make it executable
 ```
-find . -print0 | cpio --null -ov --format=newc   | gzip -9 > $ZZZ_ROOT/initramfs.cpio.gz
+chmod +x etc/init.d/rcS
+```
+now finally create the file system image
+```
+pushd $ZZZ_ROOT/busybox/_install
+find . -print0 | cpio --null -ov --format=newc | gzip -9 > $ZZZ_ROOT/initramfs.cpio.gz
+popd
 ```
 
 ## Testing

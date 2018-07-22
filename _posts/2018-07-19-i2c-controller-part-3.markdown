@@ -40,12 +40,8 @@ the busy-wait way and verify that everything works.
 
 ## Implementation
 Now that we got that out of the way let's get started with our device driver.
-We are going to implement it as an out-of-tree kernel module and hence will
-build it as
-```
-cd $ZZZ_ROOT/linux
-make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm -C $ZZZ_ROOT/linux M=${PWD} modules
-```
+We are going to implement it as an out-of-tree kernel module as it simplifies
+building.
 
 
 The code for the non-interrupt driven device driver can be found in
@@ -53,6 +49,19 @@ The code for the non-interrupt driven device driver can be found in
 Notice that we are reusing a lot of code from
 [axi_master_client.c](https://github.com/markus-zzz/i2c-controller/blob/master/axi_master_client.c)
 from the first post.
+
+```
+cd $ZZZ_ROOT/i2c-controller/linux
+make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm -C $ZZZ_ROOT/linux M=${PWD} modules
+```
+After building the driver be sure to remember to copy the resulting
+*i2c-eprom-driver.ko* to the BusyBox file system and rebuild the image
+```
+cp $ZZZ_ROOT/i2c-controller/linux/i2c-eprom-driver.ko $ZZZ_ROOT/busybox/_install/
+pushd $ZZZ_ROOT/busybox/_install
+find . -print0 | cpio --null -ov --format=newc | gzip -9 > $ZZZ_ROOT/initramfs.cpio.gz
+popd
+```
 
 ## Testing
 Once built and moved to the BusyBox filesystem the module installs as follows
@@ -70,4 +79,16 @@ with zeros, then write some string into it and verify that it reads back.
 dd if=/dev/zero of=/dev/zzz-i2c-eprom count=16 bs=1
 echo "Hello world!!!" > /dev/zzz-i2c-eprom
 cat /dev/zzz-i2c-eprom
+echo -n "J" > /dev/zzz-i2c-eprom
+cat /dev/zzz-i2c-eprom
 ```
+
+## Wrap up
+And there we have it, a complete simulation chain from custom RTL to a Linux
+device driver. In my opinion this is pretty cool and the best thing of all is
+that it does not use any pesky proprietary software or vendor branches.
+
+In the next post we will be looking at the interrupt mapping and improving the
+device driver.
+
+Did you like this post? Questions or feedback - leave a comment below!
