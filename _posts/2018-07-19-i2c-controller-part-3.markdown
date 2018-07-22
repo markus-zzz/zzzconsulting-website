@@ -43,7 +43,8 @@ Now that we got that out of the way let's get started with our device driver.
 We are going to implement it as an out-of-tree kernel module and hence will
 build it as
 ```
-make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm -C $ROOT/linux M=${PWD} modules
+cd $ZZZ_ROOT/linux
+make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm -C $ZZZ_ROOT/linux M=${PWD} modules
 ```
 
 

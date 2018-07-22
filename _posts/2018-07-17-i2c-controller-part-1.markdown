@@ -28,9 +28,33 @@ simulation of a basic I2C controller that connects to a host as an AXI slave. In
 future posts we will connect the simulation with QEMU and finish it all up by
 writing a Linux device driver.
 
+## Preparations
+To follow along the reader is urged to acquire the following packages (Verilog
+simulator and waveform viewer)
+```
+sudo apt-get install iverilog gtkwave
+```
+As always with these things a lot of commands will be issued and a lot of paths
+will be used so in an attempt to keep the commands copy-pastable (without the
+reader having to manually modify the paths all the time) we are going to
+introduce the following environment variable and use that as much as possible
+through out the posts
+```
+export ZZZ_ROOT=some/path
+```
+Now let us begin by checking out the Git repository
+[https://github.com/markus-zzz/i2c-controller](https://github.com/markus-zzz/i2c-controller).
+```
+cd $ZZZ_ROOT
+git clone https://github.com/markus-zzz/i2c-controller
+```
+It should be noted that a single repository and single branch is used for the
+entire post series so some of the files may contain code that will first be
+relevant for the later posts.
+
 ## Implementation
 After some thinking I decided that the AXI interface of my simple I2C
-controller should expose these two registers:
+controller should expose these two registers
 
 #### Control register
 
@@ -123,13 +147,10 @@ and in this state we use a non-blocking receive. On the other hand when the
 block is ready it is safe to fall back on blocking receives as there is no work
 to do until we get a command from the AXI.
 
-The code for this post series can be found in
-[https://github.com/markus-zzz/i2c-controller](https://github.com/markus-zzz/i2c-controller).
 
 To try it all out follow the instructions below
 ```
-git clone https://github.com/markus-zzz/i2c-controller
-cd i2c-controller
+cd $ZZZ_ROOT/i2c-controller
 ./build-all.sh
 ./run-all.sh
 ```

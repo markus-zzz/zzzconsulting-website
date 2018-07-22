@@ -15,15 +15,14 @@ modify it by adding our device.
 
 ## Get, modify and build QEMU
 ```
-export $ROOT=some/path
-cd $ROOT
+cd $ZZZ_ROOT
 wget https://download.qemu.org/qemu-2.12.0.tar.xz
 tar xf qemu-2.12.0.tar.xz
 mkdir qemu-build
-cd qemu-build
-../qemu-2.12.0/configure --prefix=$ROOT/qemu-install
+cd $ZZZ_ROOT/qemu-build
+../qemu-2.12.0/configure --prefix=$ZZZ_ROOT/qemu-install
 make install -j8
-export PATH=$ROOT/qemu-install/bin:$PATH
+export PATH=$ZZZ_ROOT/qemu-install/bin:$PATH
 ```
 
 To register our device we need to add the following line to the
@@ -50,12 +49,16 @@ for our intended target. I grabbed a pre-built one from
 [here](https://releases.linaro.org/components/toolchain/binaries/latest-6/arm-linux-gnueabihf/).
 Then we need to acquire and build the kernel sources
 ```
+cd $ZZZ_ROOT
 wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.17.8.tar.xz
+tar xf linux-4.17.8.tar.xz
+cd $ZZZ_ROOT/linux
 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm vexpress_defconfig
 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm -j8
 ```
 After that BusyBox
 ```
+cd $ZZZ_ROOT
 wget http://busybox.net/downloads/busybox-1.29.1.tar.bz2
 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm vdefconfig
 make CROSS_COMPILE=arm-linux-gnueabihf- ARCH=arm vmenuconfig (enable static link option)
@@ -74,7 +77,7 @@ echo /sbin/mdev > /proc/sys/kernel/hotplug
 ```
 and finally create the file system image
 ```
-find . -print0 | cpio --null -ov --format=newc   | gzip -9 > ../initramfs.cpio.gz
+find . -print0 | cpio --null -ov --format=newc   | gzip -9 > $ZZZ_ROOT/initramfs.cpio.gz
 ```
 
 ## Testing
@@ -82,7 +85,7 @@ find . -print0 | cpio --null -ov --format=newc   | gzip -9 > ../initramfs.cpio.g
 ### Linux boot
 First let us boot up the Linux system
 ```
-qemu-system-arm -M vexpress-a9 -kernel arch/arm/boot/zImage -dtb ./arch/arm/boot/dts/vexpress-v2p-ca9.dtb -nographic -initrd initramfs.cpio.gz -append "console=ttyAMA0 ignore_loglevel log_buf_len=10M print_fatal_signals=1 LOGLEVEL=8 earlyprintk=vga,keep sched_debug root=/dev/ram rdinit=/sbin/init"
+qemu-system-arm -M vexpress-a9 -kernel $ZZZ_ROOT/linux/arch/arm/boot/zImage -dtb $ZZZ_ROOT/linux/arch/arm/boot/dts/vexpress-v2p-ca9.dtb -nographic -initrd $ZZZ_ROOT/initramfs.cpio.gz -append "console=ttyAMA0 ignore_loglevel log_buf_len=10M print_fatal_signals=1 LOGLEVEL=8 earlyprintk=vga,keep sched_debug root=/dev/ram rdinit=/sbin/init"
 ```
 QEMU has a monitor that can be entered by issuing **ctrl-a c**. There is also a
 shorthand for the very useful quit command by pressing **ctrl-a x**.
@@ -119,11 +122,11 @@ devmem 0x1e00b000
 devmem 0x1e00b008
 ```
 Note that we already verified that the I2C controller was working reasonably
-well in the preivous post so we can delay further testing of that until the
+well in the previous post so we can delay further testing of that until the
 next post where we implement a proper device driver.
 
 ## Wrap up
-That concludes todays post. As always the interesting details are in the code
+That concludes today's post. As always the interesting details are in the code
 so be sure to check it out.
 
 Did you like this post? Questions or feedback - leave a comment below!
