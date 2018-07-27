@@ -25,20 +25,40 @@ possible purpose and depending on what your intended purpose is they may in
 fact make things a lot more complicated than they need to be.
 
 ## MyCC
-So how much prototype is it? Well a lot!
 
-The design borrows a lot of ideas from LLVM
+The design of MyCC borrows heavily from LLVM. One of the best things about LLVM
+is the use of a very well defined intermediate representation in the middle
+end. This LLVM IR is linearised and resembles assembly language so much that
+they in fact call it [the LLVM Assembly
+Language](https://llvm.org/docs/LangRef.html).
 
-- IR very similar
-- mem2reg pass
-- importable and exportable IR
+As stated in that document one of the design criteria for the IR was to
+represents well both in graph form in compiler memory as well as in human
+readable textual form in dump files. The importance of the latter cannot be
+overstated.
 
-Interesting ideas
-- Simulate middle end IR after each pass
-- Simulate middle end IR after each pass
+While a well defined IR allows us to import and export the entire compilation
+state between passes it also allows us to create a virtual machine that can
+execute this IR. Together these two provide for the development of some very
+powerful testing tool.
 
-## An example
-Consider something simple such as the computation of a dot like product i.e.
+
+## Preparations
+```
+export ZZZ_ROOT=some/path
+cd $ZZZ_ROOT
+git clone https://github.com/markus-zzz/mycc.git
+mkdir $ZZZ_ROOT/mycc/build
+cd $ZZZ_ROOT/mycc/build
+make -f $ZZZ_ROOT/mycc/src/Makefile
+cd $ZZZ_ROOT/mycc/test
+./runner.pl
+```
+
+## A tour down the compilation pipeline
+Let us take a look at a simple example and see how the code gets transformed as
+we move further down the compilation pipeline. Consider something simple such
+as *dot.c* given below
 ```
 int dot(int *a, int *b, int len)
 {
@@ -51,199 +71,30 @@ int dot(int *a, int *b, int len)
 	return sum;
 }
 ```
-Dumping of the AST nodes gives us
+Begin by invoking the compiler driver as in
 ```
-TU [0x18f8520]
-\-FUNCTION_DEF [0x18f84d0]
-  +-DECLARATION_SPECIFIERS [0x18f6960]
-  | \-TYPE_SPECIFIER [0x18f68f0]
-  |   \-INT [0x18f68a0]
-  +-DECLARATOR [0x18f7280]
-  | \-DIRECT_DECLARATOR [0x18f7230]
-  |   +-DIRECT_DECLARATOR [0x18f6a00]
-  |   | \-IDENTIFIER (dot)[0x18f69b0]
-  |   \-PARAMETER_TYPE_LIST [0x18f71e0]
-  |     +-PARAMETER_DECLARATION [0x18f6ca0]
-  |     | +-DECLARATION_SPECIFIERS [0x18f6af0]
-  |     | | \-TYPE_SPECIFIER [0x18f6aa0]
-  |     | |   \-INT [0x18f6a50]
-  |     | \-DECLARATOR [0x18f6c50]
-  |     |   +-POINTER [0x18f6b60]
-  |     |   \-DIRECT_DECLARATOR [0x18f6c00]
-  |     |     \-IDENTIFIER (a)[0x18f6bb0]
-  |     +-PARAMETER_DECLARATION [0x18f6f40]
-  |     | +-DECLARATION_SPECIFIERS [0x18f6d90]
-  |     | | \-TYPE_SPECIFIER [0x18f6d40]
-  |     | |   \-INT [0x18f6cf0]
-  |     | \-DECLARATOR [0x18f6ef0]
-  |     |   +-POINTER [0x18f6e00]
-  |     |   \-DIRECT_DECLARATOR [0x18f6ea0]
-  |     |     \-IDENTIFIER (b)[0x18f6e50]
-  |     \-PARAMETER_DECLARATION [0x18f7190]
-  |       +-DECLARATION_SPECIFIERS [0x18f7050]
-  |       | \-TYPE_SPECIFIER [0x18f6fe0]
-  |       |   \-INT [0x18f6f90]
-  |       \-DECLARATOR [0x18f7140]
-  |         \-DIRECT_DECLARATOR [0x18f70f0]
-  |           \-IDENTIFIER (len)[0x18f70a0]
-  \-COMPOUND_STATEMENT [0x18f8480]
-    +-DECLARATION_LIST [0x18f83e0]
-    | +-DECLARATION [0x18f7570]
-    | | +-DECLARATION_SPECIFIERS [0x18f7390]
-    | | | \-TYPE_SPECIFIER [0x18f7320]
-    | | |   \-INT [0x18f72d0]
-    | | \-INIT_DECLARATOR_LIST [0x18f7520]
-    | |   \-INIT_DECLARATOR [0x18f74d0]
-    | |     \-DECLARATOR [0x18f7480]
-    | |       \-DIRECT_DECLARATOR [0x18f7430]
-    | |         \-IDENTIFIER (i)[0x18f73e0]
-    | \-DECLARATION [0x18f78b0]
-    |   +-DECLARATION_SPECIFIERS [0x18f7680]
-    |   | \-TYPE_SPECIFIER [0x18f7610]
-    |   |   \-INT [0x18f75c0]
-    |   \-INIT_DECLARATOR_LIST [0x18f7860]
-    |     \-INIT_DECLARATOR [0x18f7810]
-    |       +-DECLARATOR [0x18f7770]
-    |       | \-DIRECT_DECLARATOR [0x18f7720]
-    |       |   \-IDENTIFIER (sum)[0x18f76d0]
-    |       \-CONSTANT (0x0)[0x18f77c0]
-    \-STATEMENT_LIST [0x18f8430]
-      +-STMT_FOR [0x18f82d0]
-      | +-EXPRESSION_STATEMENT [0x18f7a10]
-      | | \-ASSIGN [0x18f79c0]
-      | |   +-IDENTIFIER (i)[0x18f7920]
-      | |   \-CONSTANT (0x0)[0x18f7970]
-      | +-EXPRESSION_STATEMENT [0x18f7b90]
-      | | \-LT [0x18f7b40]
-      | |   +-IDENTIFIER (i)[0x18f7a80]
-      | |   \-IDENTIFIER (len)[0x18f7af0]
-      | +-ASSIGN [0x18f7d60]
-      | | +-IDENTIFIER (i)[0x18f7c00]
-      | | \-ADD [0x18f7d10]
-      | |   +-IDENTIFIER (i)[0x18f7c70]
-      | |   \-CONSTANT (0x1)[0x18f7cc0]
-      | \-COMPOUND_STATEMENT [0x18f8280]
-      |   \-STATEMENT_LIST [0x18f8230]
-      |     \-EXPRESSION_STATEMENT [0x18f81e0]
-      |       \-ASSIGN [0x18f8190]
-      |         +-IDENTIFIER (sum)[0x18f7dd0]
-      |         \-ADD [0x18f8140]
-      |           +-IDENTIFIER (sum)[0x18f7e40]
-      |           \-MUL [0x18f80f0]
-      |             +-INDEX [0x18f7f70]
-      |             | +-IDENTIFIER (a)[0x18f7eb0]
-      |             | \-IDENTIFIER (i)[0x18f7f20]
-      |             \-INDEX [0x18f80a0]
-      |               +-IDENTIFIER (b)[0x18f7fe0]
-      |               \-IDENTIFIER (i)[0x18f8050]
-      \-STMT_RETURN [0x18f8390]
-        \-IDENTIFIER (sum)[0x18f8340]
+./build/driver --dump-all dot.c
 ```
-After being translated to middle end IR
-```
-define i32 @dot(p32, p32, i32) {
- bb1:
-  %3 = alloca p32 4, 1
-  %4 = getparam p32 0
-  %5 = store p32 %3, %4
-  %6 = alloca p32 4, 1
-  %7 = getparam p32 1
-  %8 = store p32 %6, %7
-  %9 = alloca p32 4, 1
-  %10 = getparam i32 2
-  %11 = store i32 %9, %10
-  %12 = alloca p32 4, 1
-  %14 = alloca p32 4, 1
-  %15 = alloca p32 4, 1
-  %16 = const i32 0x00000000
-  %17 = store i32 %15, %16
-  %22 = const i32 0x00000000
-  %23 = store i32 %14, %22
-  br label %bb3
+doing so should produce a set of dump files where the intermediate
+representation at the given stage is dumped. These files are very important for
+debugging since they often times allow you to pinpoint at what stage things go
+wrong
 
- bb3:
-  %24 = load i32 %14
-  %25 = load i32 %9
-  %26 = icmp_slt i32 %24, %25
-  br %26, label %bb4, label %bb6
+- [ast_00_pristine.txt]({{site.url}}/download/mycc-an-introduction/ast_00_pristine.txt) -
+When the front end parses the input code it produces an Abstract Syntax Tree
+(AST). This representation is extremely verbose and essentially contains an AST
+node for each token in the input.
+- [ir_00_pristine.txt]({{site.url}}/download/mycc-an-introduction/ir_00_pristine.txt) -
+Middle end Intermediate Representation (what we simply call IR) immediately
+after being translated from AST.
+- [ir_01_mem2reg.txt]({{site.url}}/download/mycc-an-introduction/ir_01_mem2reg.txt) -
+IR after applying the *mem2reg* optimization pass.
+- [cg_00_iselect.txt]({{site.url}}/download/mycc-an-introduction/cg_00_iselect.txt) -
+Code Generator intermediate representation after selecting machine instructions
+for the middle end IR. Note that this IR is using virtual registers and is
+still in SSA form.
+- [cg_01_regalloc.txt]({{site.url}}/download/mycc-an-introduction/cg_01_regalloc.txt) -
+Machine instructions after allocating physical registers.
+- [cg_02_branch_predication.txt]({{site.url}}/download/mycc-an-introduction/cg_02_branch_predication.txt) -
+Machine instructions after performing branch predication optimization pass.
 
- bb6:
-  %47 = load i32 %15
-  %48 = store i32 %12, %47
-  br label %bb2
-
- bb2:
-  %13 = load i32 %12
-  ret i32 %13
-
- bb4:
-  %27 = load i32 %15
-  %28 = load p32 %3
-  %29 = load i32 %14
-  %30 = const i32 0x00000004
-  %31 = mul i32 %29, %30
-  %32 = add p32 %28, %31
-  %33 = load i32 %32
-  %34 = load p32 %6
-  %35 = load i32 %14
-  %36 = const i32 0x00000004
-  %37 = mul i32 %35, %36
-  %38 = add p32 %34, %37
-  %39 = load i32 %38
-  %40 = mul i32 %33, %39
-  %41 = add i32 %27, %40
-  %42 = store i32 %15, %41
-  br label %bb5
-
- bb5:
-  %43 = load i32 %14
-  %44 = const i32 0x00000001
-  %45 = add i32 %43, %44
-  %46 = store i32 %14, %45
-  br label %bb3
-
-}
-```
-and letting mem2reg do its job
-```
-define i32 @dot(p32, p32, i32) {
- bb1:
-  %4 = getparam p32 0
-  %7 = getparam p32 1
-  %10 = getparam i32 2
-  %16 = const i32 0x00000000
-  %22 = const i32 0x00000000
-  br label %bb3
-
- bb3:
-  %49 = phi i32 [%16, %bb1], [%41, %bb5]
-  %50 = phi i32 [%22, %bb1], [%45, %bb5]
-  %26 = icmp_slt i32 %50, %10
-  br %26, label %bb4, label %bb6
-
- bb6:
-  br label %bb2
-
- bb2:
-  ret i32 %49
-
- bb4:
-  %30 = const i32 0x00000004
-  %31 = mul i32 %50, %30
-  %32 = add p32 %4, %31
-  %33 = load i32 %32
-  %36 = const i32 0x00000004
-  %37 = mul i32 %50, %36
-  %38 = add p32 %7, %37
-  %39 = load i32 %38
-  %40 = mul i32 %33, %39
-  %41 = add i32 %49, %40
-  br label %bb5
-
- bb5:
-  %44 = const i32 0x00000001
-  %45 = add i32 %50, %44
-  br label %bb3
-
-}
-```
