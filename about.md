@@ -4,7 +4,11 @@ title: About
 permalink: /about/
 ---
 
-So who am I? Well here is my resume.
+**Name: Markus Lavin**
+
+**Location: Lund, Sweden**
+
+**Year of birth: 1978**
 
 # Resume
 ## Personal profile
