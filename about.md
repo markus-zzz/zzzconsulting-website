@@ -4,6 +4,8 @@ title: About
 permalink: /about/
 ---
 
+<img align="right" width="150" height="150" src="{{site.url}}/download/me.jpg">
+
 **Name: Markus Lavin**
 
 **Location: Lund, Sweden**
