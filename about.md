@@ -20,10 +20,17 @@ embedded software to digital architecture and design.
 
 ## Employment
 
+### Software developer @ [Ericsson](http://www.ericsson.com)
+Location: Lund
+
+Duration: October 2018 - Present
+
+Summary: DSP compiler engineer working on compilers for the company's proprietary DSPs.
+
 ### Supreme genius engineer<sup>1</sup> @ [ZZZ-Consulting](http://www.zzzconsulting.se)
 Location: Lund
 
-Duration: November 2017 - Present
+Duration: November 2017 - October 2018
 
 ### Senior software engineer @ [ARM](http://www.arm.com)
 Location: Lund
