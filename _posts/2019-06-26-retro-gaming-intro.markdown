@@ -1,11 +1,11 @@
 ---
 layout: post
-title:  "A look at retro gaming"
+title:  "A look at retro gaming hardware"
 comments: true
-categories: compiler llvm
+categories: hardware rtl verilog game retro
 ---
 
-Back when I was a kid in the late 80's early 90's I had a [Commodore
+Back when I was a kid in the late 80's and early 90's I had a [Commodore
 64](https://en.wikipedia.org/wiki/Commodore_64), a [Amiga
 500](https://en.wikipedia.org/wiki/Amiga_500) and eventually a [Amiga
 1200](https://en.wikipedia.org/wiki/Amiga_1200). Now besides playing games and
@@ -13,40 +13,41 @@ calling [BBS](https://en.wikipedia.org/wiki/Bulletin_board_system)s I never got
 around to do any programming on these devices.  Something that I quite regret
 now in grown age when I realize how beautiful, and in a way simple, these
 machines were. Well to be honest I did play around a bit with
-[BASIC](https://en.wikipedia.org/wiki/BASIC) but I never really got a hang of
-it and hence never became hooked. It wasn't until years later when I learned C that
-I finally started to understand how a computer works.
+[BASIC](https://en.wikipedia.org/wiki/BASIC) but as BASIC is well BASIC I never
+really got a hang of anything and didn't understand much either. It wasn't
+until years later when I finally learned C that things started to make sense. 
 
 Not too long ago I read about the
 [MiSTer](https://github.com/MiSTer-devel/Main_MiSTer/wiki) project and while I
-have known about the [Minimig](https://en.wikipedia.org/wiki/Minimig) for a
-long time it wasn't until now it appeared to be running on almost off the shelf
-hardware. This and seeing Youtube videos of people reverse engineering old
-arcade PCBs (e.g.  [this](https://www.youtube.com/watch?v=g8gZT1F9UkE) one)
-inspired me to look into this field again.
+have known about the [Minimig](https://en.wikipedia.org/wiki/Minimig) core for
+a long time it wasn't until now it appeared to be running on a almost
+off-the-shelf FPGA board not requiring a hard
+[m68k](https://en.wikipedia.org/wiki/Motorola_68000) CPU. This and seeing
+Youtube videos of people reverse engineering old arcade PCBs (e.g.
+[this](https://www.youtube.com/watch?v=g8gZT1F9UkE)) inspired me to try and do
+some work in this area myself.
 
 I also found a nice little book called [Designing Video Game Hardware in
 Verilog](https://www.amazon.com/dp/B07LD48CTV/ref=pe_385040_118058080_TE_M1DP)
-by a guy named Steven Hugg. The Kindle version sells for $12 and I highly
-recommend this book, not because it is great and contains tons of stuff you
-didn't already know or could not figure out yourself but because it is a nice
-read with interesting historical remarks and it comes with a website called
-[8bitworkshops](https://8bitworkshop.com/) that is pretty awesome and
-is coincidently also the topic of this blog post.
+by a guy named Steven Hugg. The Kindle version sells for only $12 and I highly
+recommend this book, not because it contains tons of stuff you didn't already
+know or could not figure out yourself but because it is a nice read with
+interesting historical remarks and it comes with a website called
+[8bitworkshops](https://8bitworkshop.com/) that is pretty awesome.
 
 Now the website can actually be fully used without purchasing the book but I
 really think it is an effort worth supporting. 
 
 While the website allows you to interactively program and run old arcade
 systems and consoles such as the Atari 2600 in both C and assembler what totally
-blew my mind is the ability to write a custom hardware design in Verilog
+blew my mind is the ability to write a custom hardware design in Verilog,
 producing a VGA video signal and then having that run in the browser displaying
 graphics on a simulated CRT (and with a pretty impressive frame rate too). 
 
-To me that all seemed fictional, did this guy actually implement a complete
-Verilog simulator in JavaScript that runs that fast? Well it turns out that he
-did not but instead used existing software in a really clever way and this post
-will try to shed some light on how.
+To me that all seemed fictional, did this guy implement a complete Verilog
+simulator in JavaScript that runs that fast? Well it turns out that he did not
+but instead used existing software in clever ways and this post will now
+briefly digress to shed some light on how.
 
 First, the source code behind the entire 8bitworkshops website is available on
 Github [here](https://github.com/sehugg/8bitworkshop).
@@ -60,14 +61,13 @@ To pull off the Verilog stunt described above it uses mainly two components:
   that compiles synthesizable verilog modules into C++ code.
 
 Now Verilator is compiled into JavaScript by Emscripten so Verilator will run
-in you browser outputting C++ code for the Verilog modules you provide. The
-question is now of course what happens with this Verilator generated C++. One
-option would be if Emscripten 'Emsripted' itself so that your browser had the
-ability to turn C++ into JavaScript but that is not what is happening. The C++
-generated by Verilator only uses a subset of the full language and is quite
-regular and the fact that this subset is quite similar (expect for some syntax
-details) to JavaScript is used to to simply do some regexp based translations.
-
+in your browser outputting C++ code for the Verilog modules you provide. The
+following question is of course what happens with this Verilator generated C++.
+One option would be if Emscripten 'Emsripted' itself so that your browser had
+the ability to turn C++ into JavaScript but that is not what is happening. The
+C++ generated by Verilator only uses a subset of the full language and is quite
+regular. The fact that this subset is similar, expect for some syntax details,
+to JavaScript is taken advantage of to to simply do a regexp based translation.
 
 Verilated C++ is translated into JavaScript by
 [src/worker/verilator2js.ts](https://github.com/sehugg/8bitworkshop/blob/10f89d0c53e610934b0035bbed5a4af258844786/src/worker/verilator2js.ts).
@@ -81,3 +81,5 @@ calls vidtick (calling tick2 to toggle the clock and advance simulation) and
 extracting VGA signals from the model, storing to a JS frame buffer for display
 on the web page.
 
+That concludes this post. Hopefully it will mark the start of a new series
+diving into the details of designing some old school video game hardware.

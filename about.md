@@ -4,7 +4,7 @@ title: About
 permalink: /about/
 ---
 
-<img align="right" width="150" height="150" src="{{site.url}}/download/me.jpg">
+<img align="right" width="128" height="128" src="{{site.url}}/download/me.jpg">
 
 **Name: Markus Lavin**
 
