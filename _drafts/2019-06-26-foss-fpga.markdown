@@ -1,0 +1,45 @@
+---
+layout: post
+title:  "FOSS FPGA"
+comments: true
+categories: hardware rtl verilog
+---
+
+Right now a lot of exiting things are happening in the world open source FPGA
+tools and I have spent some time searching the web and intend to use this post
+to summarize my findings and understanding so far.
+
+# SymbiFlow - 'the GCC of FPGAs'
+
+Main site [here](https://symbiflow.github.io/).
+
+This is sort of a umbrella project for the following components:
+
+## Main tools
+
+### Yosys
+
+* synthesize -
+* optimize - 
+* __techmap__ - map IR to cells available on target architecure (typically LUTs, MUXes, and FFs but also more advanced cells like BRAMs and DSPs).
+ 
+### nextpnr
+
+* __pack__ - putting the techmapped logic cells (lut4, mux, ff) into slices (and possible also tiles need to check).
+* __place__ - place the tiles on the grid?
+* __route__ - connect the tiles?
+
+## Legality
+Surely using the vendors own tools to reverse engineer their FPGA bit-stream
+formats must be violating the EULA of said tools? Well this probably falls into
+some kind of legal gray area but the teams own response to this can be heard
+during the [Q&A](https://youtu.be/5RryRQ1Rr0M?t=2745) of
+[this](https://youtu.be/5RryRQ1Rr0M) very interesting talk.
+
+* [35C3 - SymbiFlow - Finally the GCC of FPGAs!](https://youtu.be/5RryRQ1Rr0M)
+* [35C3 - The nextpnr FOSS FPGA place-and-route tool](https://youtu.be/Zi9gaSPFqM0)
+* [Project Trellis: enabling open source tools for the Lattice ECP5 FPGA - David Shah - ORConf 2018](https://youtu.be/cTOkgDZli_o)
+
+https://github.com/YosysHQ/nextpnr
+
+
