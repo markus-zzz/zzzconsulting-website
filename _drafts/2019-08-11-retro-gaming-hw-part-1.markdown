@@ -25,7 +25,7 @@ well as source code) can be examined by anyone, either through the builtin
 Pico-8 IDE or using the python
 [picotool](https://github.com/dansanderson/picotool) module.
 
-I for one find this game to be truely awesome and what was done with the
+I for one find this game to be truly awesome and what was done with the
 limited resources really impresses me. As a result the goal of my project is
 now to design 80's style sprite and tile based video game hardware that is
 capable of playing that game and run it on a FPGA.
@@ -50,8 +50,8 @@ odd scanlines will look the same) and introducing a clock enable (set by the
 lowest bit of the horizontal video coordinate) to have the sprite and tile
 shifters keep the same pixel value for two consecutive horizontal video pixels.
 
-A sprite/tile in our system is 8x8 pixels and a pixel holds 4 bits of color
-information.
+A sprite/tile in Pico-8 is 8x8 pixels and a pixel holds 4 bits of color
+information. We will do the same.
 
 A sprite shifter module is basically a shift register combined with some
 triggering logic to make the shifting start only when a programmed horizontal
@@ -68,9 +68,6 @@ corresponding sprite lines into the sprite shifters and set the horizontal
 trigger position.
 * When the active region starts load the corresponding tile line into the tile
 shifter based simply on the contents of the VRAM tile table.
-
-Describe 8x8 sprite/tiles and the descriptor table and how that is similar to
-NES.
 
 The sprite descriptor format is:
 
@@ -105,7 +102,7 @@ multiplication the dimension is rounded up to the nearest power-of-two i.e.
 64x32 resulting in 2048 bytes (in fact the size can be much less depending on
 if this is row major or column major).
 
-These extra rows and coulmns may come in handy whey trying to support
+These extra rows and columns may come in handy whey trying to support
 smooth scrolling.
 
 All in all it is reasonable to dimension the VRAM to 8192 bytes. To allow
@@ -114,11 +111,11 @@ efficient 32 bit access from both GFX and CPU this is laid out as 2048 x
 
 So to sum it up VRAM is laid out as follows:
 
-|Base|Size|Area|Description|
-|----|----|----|-----------|
-|0|4096|Bitmaps|Table of 128 8x8 sprite/tile bitmaps with 4-bit color depth (each bitmap consumes 32 bytes).|
-|4096|256|SpriteDesc|Table of 64 sprite descriptors each of size 32 bits.|
-|4096|256|TileIdx||
+|Base|Size|Description|
+|----|----|-----------|
+|0|4096|Table of 128 8x8 sprite/tile bitmaps with 4-bit color depth (each bitmap consumes 32 bytes).|
+|4096|256|Table of 64 sprite descriptors each of size 32 bits.|
+|4352|2048|40x30 table of background tile indices (addressed as if dimensions were 64x32).|
 
 ### CPU
 One thing that is not so awesome about 80's systems is the software tools
@@ -134,7 +131,7 @@ over computational efficiency.
 
 |Base|Size|Memory|
 |----|----|-----------|
-|0x00000000|??|ROM|
+|0x00000000|16KB|ROM|
 |0x10000000|??|RAM|
 |0x20000000|8192|VRAM|
 |0x30000000|4|System status register|
@@ -142,8 +139,80 @@ over computational efficiency.
 
 ## Current implementation
 
-Something about vgamon and verilator maybe a screenshot.
+The implementation can be found on
+[github](https://github.com/markus-zzz/retrocon/tree/dev). While being very
+much work in progress it is currently capable of bouncing sprites around over
+static background tiles as can be seen in this animation
 
-Table of device utilization (slices used).
+![Bouncing sprites](/download/retrocon-sprite-bounce.apng)
 
-Something about HDMI/DVI video and code borrowed from ...
+The PNGs for the animation above were produced by a
+[Verilator](https://www.veripool.org/wiki/verilator) based simulation using the
+custom tool
+[vgamon](https://github.com/markus-zzz/retrocon/blob/dev/sim/verilator/vgamon.cpp)
+that captures the VGA output of the design either displaying it in real time
+(i.e. on my machine ~8 frames per second) and optionally storing frames to PNG
+files.
+
+Now Verilator is pretty awesome and this tool has already proven extremely
+useful. Considering the sheer amount of simulation cycles that go into
+producing a single frame makes you quickly realize that traditional simulators
+such as [Icarus Verilog](http://iverilog.icarus.com/) don't quite cut it for
+this purpose.
+```
+Usage: ./vgamon [OPTIONS]
+
+  --scale=N             -- set pixel scaling
+  --frame-rate=N        -- try to produce a new frame every N ms
+  --save-frame-from=N   -- dump frames to .png starting from frame #N
+  --save-frame-to=N=N   -- dump frames to .png ending with frame #N
+  --save-frame-prefix=S -- prefix dump frame files with S
+  --exit-after-frame=N  -- exit after frame #N
+  --trace               -- create dump.vcd
+```
+The design has been tested on a [ULX3S](https://radiona.org/ulx3s/) FPGA board
+using the open source [SymbiFlow](https://symbiflow.github.io/) tools (Yosys
+and nextpnr). Doing so gives a device utilization as follows for the boards
+[ECP5 12F](https://www.latticesemi.com/Products/FPGAandCPLD/ECP5).
+```
+Info: Device utilisation:
+Info:          TRELLIS_SLICE:  2822/12144    23%
+Info:             TRELLIS_IO:    10/  196     5%
+Info:                   DCCA:     3/   56     5%
+Info:                 DP16KD:    16/   56    28%
+Info:             MULT18X18D:     0/   28     0%
+Info:                 ALU54B:     0/   14     0%
+Info:                EHXPLLL:     1/    2    50%
+Info:                EXTREFB:     0/    1     0%
+Info:                   DCUA:     0/    1     0%
+Info:              PCSCLKDIV:     0/    2     0%
+Info:                IOLOGIC:     0/  128     0%
+Info:               SIOLOGIC:     8/   68    11%
+Info:                    GSR:     0/    1     0%
+Info:                  JTAGG:     0/    1     0%
+Info:                   OSCG:     0/    1     0%
+Info:                  SEDGA:     0/    1     0%
+Info:                    DTR:     0/    1     0%
+Info:                USRMCLK:     0/    1     0%
+Info:                CLKDIVF:     0/    4     0%
+Info:              ECLKSYNCB:     0/    8     0%
+Info:                DLLDELD:     0/    8     0%
+Info:                 DDRDLL:     0/    4     0%
+Info:                DQSBUFM:     0/    8     0%
+Info:        TRELLIS_ECLKBUF:     0/    8     0%
+```
+The only video output on ULX3S is a HDMI compatible connector so we borrow the
+code from [Project Trellis DVI](https://github.com/daveshah1/prjtrellis-dvi) to
+output DVI over that connector. Works surprisingly well!
+
+## Next steps
+Some ideas for the future:
+* Implement UART based means to upload CPU code and RAM contents to running
+  board (having to re-synthesize as is the case now really slows down the
+  development cycle).
+* Implement horizontal flip and vertical flip sprite flags.
+* Support for smooth scrolling background tiles (preferably in all directions).
+* Look into supporting Pico-8 style sound effects.
+* Fix a million bugs :)
+
+That is it for now. Hopefully I will make some more progress soon!
