@@ -14,7 +14,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: ZZZ-Consulting
-email: info@zzzconsulting.se
+email: firstname.lastname@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   Consulting services offered in the fields of Compiler engineering, Graphics
   programming and Embedded computing.

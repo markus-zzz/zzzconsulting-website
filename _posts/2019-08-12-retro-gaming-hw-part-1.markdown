@@ -25,10 +25,10 @@ well as source code) can be examined by anyone, either through the builtin
 Pico-8 IDE or using the python
 [picotool](https://github.com/dansanderson/picotool) module.
 
-I for one find this game to be truly awesome and what was done with the
-limited resources really impresses me. As a result the goal of my project is
-now to design 80's style sprite and tile based video game hardware that is
-capable of playing that game and run it on a FPGA.
+I for one find this game to be truly awesome and I am really impressed with how
+well it plays even with such limited resources. As a result the goal of my
+project is now to design 80's style sprite and tile based video game hardware
+that is capable of playing a game like this and run it on a FPGA.
 
 ## Design
 
@@ -99,11 +99,11 @@ With a screen resolution of 320x200 and sprite/tile size of 8x8 a total of
 40x30 tiles are needed to cover the screen using a 8 bit index for each results
 in 1200 bytes. Since we want to be able to index this memory without performing
 multiplication the dimension is rounded up to the nearest power-of-two i.e.
-64x32 resulting in 2048 bytes (in fact the size can be much less depending on
-if this is row major or column major).
+64x32 resulting in 2048 bytes (in fact the storage size can be much less
+depending on if this is row major or column major).
 
-These extra rows and columns may come in handy whey trying to support
-smooth scrolling.
+The extra rows and columns may come in handy whey trying to support smooth
+scrolling.
 
 All in all it is reasonable to dimension the VRAM to 8192 bytes. To allow
 efficient 32 bit access from both GFX and CPU this is laid out as 2048 x
@@ -132,8 +132,8 @@ over computational efficiency.
 |Base|Size|Memory|
 |----|----|-----------|
 |0x00000000|16KB|ROM|
-|0x10000000|??|RAM|
-|0x20000000|8192|VRAM|
+|0x10000000|4KB|RAM|
+|0x20000000|8KB|VRAM|
 |0x30000000|4|System status register|
 
 
@@ -141,8 +141,8 @@ over computational efficiency.
 
 The implementation can be found on
 [github](https://github.com/markus-zzz/retrocon/tree/dev). While being very
-much work in progress it is currently capable of bouncing sprites around over
-static background tiles as can be seen in this animation
+much work in progress it is capable of bouncing sprites around over static
+background tiles as can be seen in this animation
 
 ![Bouncing sprites](/download/retrocon-sprite-bounce.apng)
 
@@ -203,7 +203,7 @@ Info:        TRELLIS_ECLKBUF:     0/    8     0%
 ```
 The only video output on ULX3S is a HDMI compatible connector so we borrow the
 code from [Project Trellis DVI](https://github.com/daveshah1/prjtrellis-dvi) to
-output DVI over that connector. Works surprisingly well!
+output DVI over that connector. It works surprisingly well!
 
 ## Next steps
 Some ideas for the future:
