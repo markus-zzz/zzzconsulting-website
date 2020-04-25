@@ -25,7 +25,7 @@ met, but luckily they also provide self contained
 *sigrok-cli* binary.
 
 Although being self contained two additional steps were required to get things
-going. 
+going.
 
 First setting up udev rules
 ```
@@ -112,7 +112,7 @@ Bus 001 Device 010: ID 0483:5740 STMicroelectronics STM32F407
 
 If you are so inclined you might now wonder what kind of digital circuitry it
 would take to build a USB device. Common sense says this would be a rather
-major undertaking so it seems wise to begin with some preparatory
+significant undertaking so it seems wise to begin with some preparatory
 considerations.
 
 ### ULX3S setup
@@ -120,18 +120,18 @@ considerations.
 As usual the platform for my experiment will be the excellent
 [ULX3S](https://radiona.org/ulx3s/). The board has two USB micro female
 connectors where the second (designated US2) is wired directly to the ECP5
-FPGA. 
+FPGA.
 
 #### Schematics
 
 Full schematics are found
 [here](https://github.com/emard/ulx3s/blob/master/doc/schematics.pdf) but for
-sake of this discussion I have extracted the relevant parts.
+the sake of this discussion I have extracted the relevant parts.
 
 ![ULX3S US2](/download/sigrok-usb/ulx3s-schematics-usb-1.png)
 
 What is interesting to note here is that the *USB_FPGA_D+* and *USB_FPGA_D-*
-pair is connected to the FPGA twice.  One pair is connected to a differential
+pair is connected to the FPGA twice. One pair is connected to a differential
 IO cell and the second pair is connected to single ended IO cells. Reason is
 that USB requires us to both drive and sample differential as well as single
 ended. Still weird though as ECP5 docs kind of suggest that all of that could
@@ -141,7 +141,7 @@ be done within one IO cell (pair).
 
 The second interesting part is that the board has FPGA controllable pull-ups.
 This allows us to attach/detach from the USB without physically touching any
-cables as well as choosing if we want to identify as a  *full-speed* or
+cables. As well as choosing if we want to identify as a *full-speed* or
 *low-speed* device.
 
 #### Clocking
@@ -156,7 +156,7 @@ four (so a 48Mhz clock would be needed).
 
 Now a 25Mhz clock does not directly PLL into a 48Mhz clock (nor any other
 reasonable multiple of 12Mhz). It does however PLL it into a 15Mhz clock that
-can be used for *low-speed* (oversampling with a factor 10). 
+can be used for *low-speed* (oversampling with a factor 10).
 
 Eventually though for *full-speed* we can use two PLLs in cascade configured as
 follows to reach exactly 48Mhz.
@@ -178,7 +178,7 @@ clkout0 frequency: 48 MHz
 VCO frequency: 576
 ```
 
-#### Connecting the Logic Analyzer 
+#### Connecting the Logic Analyzer
 
 A sturdy attachment point for the analyzer is desirable as it is rather
 annoying having test hook clips constantly falling off the board as soon as it
@@ -197,9 +197,9 @@ Having powerful tools such as the Sigrok suite and the Logic Analyzer will
 prove invaluable for the task ahead. In fact, as we shall soon see, they will be
 useful in not only the obvious way.
 
-Capture signaling/traffic between USB host and FPGA would be the obvious
-application and while this will eventually prove invaluable we need to get
-quite a lot of things working to reach this point.  
+Capture signaling/traffic between the USB host and FPGA would be the obvious
+application and while this will eventually be its main use we need to get quite
+a lot of things working to reach that point.
 
 In the meantime we can capture authentic host signaling and feed into RTL
 simulation. Doing so can be easily accomplished with
@@ -244,7 +244,7 @@ Once our RTL simulation generates USB signaling we can feed that into sigrok
 for decode and verification. It is just a matter of having simulation produce a
   [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) file and then
 ```
-sigrok-cli -i capture.csv -I csv:samplerate=48000000 -o capture.sr 
+sigrok-cli -i capture.csv -I csv:samplerate=48000000 -o capture.sr
 ```
 where the file `capture.sr` can be opened and graphically decoded in
 *PulseView*. Pretty awesome!
