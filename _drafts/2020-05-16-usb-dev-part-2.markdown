@@ -202,7 +202,7 @@ to perform the first steps of the USB enumeration process with the ULX3S
 connected to my Linux workstation. The logic analyzer captured the following
 [trace]({{site.url}}/download/sigrok-usb/ulx3s-usbdev-1.sr) (5M samples at 5Mhz
 but only 68KB file size with sigrok's native format). The reader is urged to
-decode it at least using
+decode it by at least using
 ```
 sigrok-cli -i ulx3s-usbdev-1.sr -P usb_signalling:dp=1:dm=0,usb_packet | awk '/usb_packet-1: [^:]+$/{ print $0 }'
 ```
