@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "USB device part-2"
+title:  "Building a USB device part-2"
 math: true
 comments: true
 categories: hardware
@@ -31,7 +31,7 @@ transition at least every seven bit times.
 With this in mind it would seem a reasonable approach to run the design at
 48Mhz and oversample the differential pair with a factor of four. More
 precisely by obtaining four equally spaced samples for each bit time we should
-be able to adjust the real sampling position (in terms of 1/4 bit times) to be
+be able to adjust the actual sampling position (in terms of 1/4 bit times) to be
 as far away for any level transition as possible (i.e. in the middle of the eye
 diagram).
 
@@ -66,7 +66,7 @@ midpoint of highest and lowest phase adjustment that makes the pattern
 detectable.
 
 A variant of the previous approach would be to use adjustable delay lines on
-the inputs (that some FPGAs support) instead of phase adjusting the clock.
+the inputs instead of phase adjusting the clock.
 
 ### The HW/SW interface
 
@@ -74,12 +74,12 @@ To control the USB block some kind of hardware/software interface needs to be
 created. I have chosen the simplest possible design that came to mind.
 
 Each endpoint has a 8 byte buffer in RAM, starting at RAM address zero comes
-the 16 IN endpoints immediately followed by the 16 OUT endpoints. In total 256
+the 16 OUT endpoints immediately followed by the 16 IN endpoints. In total 256
 bytes of RAM are used for endpoint buffers.
 
 In addition the following registers are exposed to the CPU.
 
- Register           | R/W | Address
+ Register           | Access | Address
 --------------------|-----|-----------
 R_USB_ADDR          | R/W | 0x20000000
 R_USB_ENDP_OWNER    | R/W | 0x20000004
@@ -90,21 +90,20 @@ R_USB_DATA_TOGGLE   | R/W | 0x20000014
 R_USB_OUT_SIZE_0_7  | R   | 0x20000018
 R_USB_OUT_SIZE_8_15 | R   | 0x2000001C
 
-I havn't bothered documenting them in detail yet but essentially it is as follows.
+I have not bothered documenting them in detail yet but essentially it is as follows.
 
 * *R_USB_ADDR* - is the 7-bit device address.
-* *R_USB_ENDP_OWNER* - The 16 low bits correspond to the 16 IN endpoints and the 16 high bits correspond to the 16 OUT endpoints. A set bit indicates that the corresponding endpoint buffer is handed over to the USB block. This means that the corresponding endpoint will accept one IN/OUT packet (with data) and ACK after which the bit will be cleared and the buffer is handed over to the CPU. When the CPU owns a buffer the USB block will respond with NAK to all IN/OUT+DATA packets.
-* *R_USB_CTRL* - Control pullups for attach.
+* *R_USB_ENDP_OWNER* - The 16 low bits correspond to the 16 OUT endpoints and the 16 high bits correspond to the 16 IN endpoints. A set bit indicates that the corresponding endpoint buffer is handed over to the USB block. This means that the corresponding endpoint will accept one IN/OUT packet (with data) and ACK, after which the bit will be cleared and the buffer is handed over to the CPU. When the CPU owns a buffer the USB block will respond with NAK to all IN/OUT+DATA packets.
+* *R_USB_CTRL* - Control pull-ups for attach.
 * *R_USB_IN_SIZE_0_7* - 4-bits per endpoint indicate the number of bytes in the corresponding buffer.
 * *R_USB_IN_SIZE_8_15* - 4-bits per endpoint indicate the number of bytes in the corresponding buffer.
-* *R_USB_DATA_TOGGLE* - The 16 low bits select the data toggle (DATA0/DATA1) to be sent for the 16 IN endpoints and the 16 high bits select the data toggle to expect for the 16 OUT endpoints.
+* *R_USB_DATA_TOGGLE* - The 16 low bits select the data toggle (DATA0/DATA1) to be expected for the 16 OUT endpoints and the 16 high bits select the data toggle to be sent for the 16 IN endpoints.
 * *R_USB_OUT_SIZE_0_7* - 4-bits per endpoint indicate the number of bytes in the corresponding buffer.
 * *R_USB_OUT_SIZE_8_15* - 4-bits per endpoint indicate the number of bytes in the corresponding buffer.
 
 Of course a primitive interface like this requires a fair amount of CPU
 intervention and if one wants to offload the CPU and achieve higher performance
-quite a lot of this handling could probably be automated by the USB block
-itself.
+a lot of this handling could be automated by the USB block itself.
 
 ### SoC
 
@@ -136,8 +135,8 @@ The USB packet generation and manipulation code is found in
 and
 [sim/usb-pack-gen.cpp](https://github.com/markus-zzz/usbdev/blob/dev/sim/usb-pack-gen.cpp). It allows both encoding and decoding of USB packets. In essence it consists of three layers
 
-* UsbPacket - Base class for the various USB packet types (SETUP,IN,OUT,DATA0,DATA1,ACK,NAK) that allow easy high level manipulation. The UsbPacket.
-* USbBitVector - A sequence of bits.
+* UsbPacket - Base class for the various USB packet types (SETUP,IN,OUT,DATA0,DATA1,ACK,NAK) that allow easy high level manipulation. UsbPacket is derived into the various packet types.
+* USbBitVector - A sequence of USB bits.
 * UsbSymbolVector - A sequence of USB symbols (J,K,SE0,SE1).
 
 There are methods for translating in both directions performing the necessary
@@ -188,22 +187,90 @@ case.
 
 When run the test-suite outputs several useful artifacts. These are
 
-* test_XXX.comp.log -
-* test_XXX.sim.log -
-* test_XXX.sim.vcd -
-* test_XXX.sim.sr -
+* test_XXX.comp.log - Any messages (errors and warnings) from the firmware compile.
+* test_XXX.sim.log - Log and debug printouts from the simulation.
+* test_XXX.sim.vcd - RTL simulation waveform in VCD format.
+* test_XXX.sim.sr - Captured USB signaling in sigrok's format.
+* test_XXX.elf - Firmware code for the RISCV CPU.
+* test_XXX.so - Shared object with test-case code to be loaded into the simulator.
 
 ## A real world example
 
-I thought we finish this post by using some hard coded driver code to perform
-the first few steps (up to changing address) of the USB enumeration process
-with the ULX3S connected to my Linux workstation.
+I thought we finish this post by using some work-in-progress driver code
+([sw/usb-dev-driver.c](https://github.com/markus-zzz/usbdev/blob/dev/sw/usb-dev-driver.c))
+to perform the first steps of the USB enumeration process with the ULX3S
+connected to my Linux workstation. The logic analyzer captured the following
+[trace]({{site.url}}/download/sigrok-usb/ulx3s-usbdev-1.sr) (5M samples at 5Mhz
+but only 68KB file size with sigrok's native format). The reader is urged to
+decode it at least using
+```
+sigrok-cli -i ulx3s-usbdev-1.sr -P usb_signalling:dp=1:dm=0,usb_packet | awk '/usb_packet-1: [^:]+$/{ print $0 }'
+```
+but preferably also in PulseView to better see reset signaling etc.
+
+In summary the following happens in the trace. The host resets the bus, the
+device descriptor is read, the host resets the bus, the host sets the device's
+address to 23, the host reads the device descriptor once again, the host reads
+the configuration descriptor (first nine bytes only to figure out total size),
+the host reads the total size of the configuration descriptor (which includes
+interface and endpoint descriptors but in our case there are none so the size
+is still 9 bytes). Finally the host tries to set the configuration of the
+device but this is not yet implemented in the firmware and the device responds
+with NAK indefinitely.
+
+On my Linux workstation the `dmesg` log contained the following lines
+
+```
+[ 2980.864737] usb 1-5: new low-speed USB device number 16 using xhci_hcd
+[ 2981.014361] usb 1-5: config 0 has no interfaces?
+[ 2981.014369] usb 1-5: New USB device found, idVendor=1234, idProduct=5678
+[ 2981.014372] usb 1-5: New USB device strings: Mfr=0, Product=0, SerialNumber=0
+[ 2981.014647] usb 1-5: config 0 descriptor??
+[ 2986.192817] usb 1-5: can't set config #0, error -110
+```
+and a `lsusb -v` contained
+```
+Bus 001 Device 016: ID 1234:5678 Brain Actuated Technologies
+Couldn't open device, some information will be missing
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass          255 Vendor Specific Class
+  bDeviceSubClass       255 Vendor Specific Subclass
+  bDeviceProtocol       255 Vendor Specific Protocol
+  bMaxPacketSize0         8
+  idVendor           0x1234 Brain Actuated Technologies
+  idProduct          0x5678
+  bcdDevice            1.00
+  iManufacturer           0
+  iProduct                0
+  iSerial                 0
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength            9
+    bNumInterfaces          0
+    bConfigurationValue     0
+    iConfiguration          0
+    bmAttributes         0x80
+      (Bus Powered)
+    MaxPower              100mA
+```
+As can be seen my made up *idVendor* actually corresponded to a registered vendor
+as can be confirmed in [Linux usb.ids](http://www.linux-usb.org/usb.ids).
+
+Slightly strange though is that `lsusb` claims that the device address is 16
+while the trace clearly contains a *SET_ADDRESS* and subsequent use of
+  address 23.
 
 ## Next steps
 
-At this point we should have hardware support to start implementing the driver
-code running on the CPU. We will surely discover more RTL bugs along the way
-but we try to fix them when they show.
+The logical next steps would be to continue working on the driver code until
+the enumeration process completes successfully supporting all required
+requests. Likely some RTL bugs will show up in the process but we will try to
+deal with them when they do.
 
 That is it for today. As always if you have questions or feedback - leave a
 comment below!
