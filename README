@@ -1,3 +1,11 @@
+# Initial setup
+sudo apt-get install ruby-dev
+rm Gemfile.lock
+bundle2.7 install  --path vendor/bundle
+
+# Preview on local webserver
 bundle exec jekyll serve --draft --port 8000
+
+# Publish
 JEKYLL_ENV=production bundle exec jekyll build
 cp -r _site/* ../markus-zzz.github.io/
