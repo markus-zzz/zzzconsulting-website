@@ -1,0 +1,181 @@
+---
+layout: post
+title:  "Commodore 64 experiments part-1"
+math: true
+comments: true
+categories: hardware c64
+---
+
+When I was a kid back in the 80s my parents bought our family's first computer,
+a Commodore 64 with a datasette station. I still have fond memories of that
+marvelous little machine. At the time though I was only ten years old so my
+mental capacity (and likely also patience) was quite limited and I never
+managed to do much with it besides playing games and typing in the occasional
+BASIC listing from the Sunday newspaper (that almost never worked).
+
+Now in recent times I often find myself watching retro computing episodes from
+the big YouTubers in the field such as [The 8-Bit
+Guy](https://www.youtube.com/user/adric22) and [Retro
+Recipes](https://www.youtube.com/channel/UC6gARF3ICgaLfs3o2znuqXA). Needless to
+say they often feature the C64 and it is refreshing to be reminded of a simpler
+time when things were not complicated to absurdity just for the sake of it.
+
+While I know that there are numerous C64 emulators available (mostly in
+software but also a few FPGA based) I always thought that would be a neat
+project to try on.
+
+Some weeks ago I ran across the [C64 on an
+FPGA](http://c64onfpga.blogspot.com/) blog series by Johan Steenkamp, a blog
+series dating from 2017 to present detailing his journey in implementing an
+FPGA based C64 emulator. While I don't agree with every design decision taken
+there the work put in to implementing and the effort spent documenting it is
+really impressive.
+
+So inspired by this I thought I would try doing something similar or at least
+see how much work would be required to get a system that boots into BASIC.
+
+## Preparations
+
+Before we can get started we need to gather some preliminary stuff.
+
+### Documentation
+
+* [Commodore 64 Programmer's Reference Guide](https://www.c64-wiki.com/wiki/Commodore_64_Programmer%27s_Reference_Guide)
+* [Commodore 64 memory map](https://sta.c64.org/cbm64mem.html)
+* [The MOS 6567/6569 video controller (VIC-II) and its application in the Commodore 64 by Christian Bauer](http://www.zimmers.net/cbmpics/cbm/c64/vic-ii.txt)
+* [6526 Complex Interface Adapter (CIA) - datasheet](http://www.6502.org/documents/datasheets/mos/mos_6526_cia_recreated.pdf)
+* [6582 SOUND Interface Device (SID) - datasheet](http://www.6502.org/documents/datasheets/mos/mos_6582_sid.pdf)
+
+### CPU
+
+A Verilog model of a 6502/6510 CPU by Arlet Ottens can be downloaded from
+[here](http://ladybug.xs4all.nl/arlet/fpga/6502/).
+
+### ROMs
+
+Kernal, basic and character ROMs can be picked up from
+[here](http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/).
+
+## Considerations
+
+By today's standards the C64 is a simply system. However when trying to
+reimplement it with modern technology (and methodology) inside a single FPGA
+there are a few things that need to be kept in mind.
+
+The design is based around asynchronous RAM so for reading you expect the data
+to become available in the same cycle as the address is presented. This is
+different from the synchronous RAM blocks found inside FPGAs where an
+additional clock cycle must pass before the data is available.
+
+There are no stall cycles or handshake signals in the bus protocol so every
+transaction is expected to complete immediately. Also if a chip is not
+connected to the bus the writes to that will simply be ignored and reads return
+a default value. When trying to bring up the system this is both good and bad.
+Good because you feel you make progress fast but bad since you will probably
+miss implementing functionality that turned out to be really important to avoid
+those hard to find bugs later on.
+
+The CPU and VIC-II share the same bus by allowing the CPU to access during the
+first phase of the clock and the VIC-II during the second phase of the clock.
+This does not map really well to the single edge methodology used in most
+modern designs.
+
+Also as the design is made up of discrete ICs they are connected with a classic
+tri-state bus. Tri-state buses inside the fabric is not supported by modern
+FPGAs so multiplexers need to be used instead. In a way though, it would be
+nice to be able to closely recreate the PCB interconnect inside the FPGA and
+have each IC correspond to a Verilog module with the exact same interface
+signals.
+
+The VIC-II has a 8Mhz pixel clock but the remaining design is based around a
+1Mhz system clock where both phases (or edges) are used. This also complicates
+matters and it is always wise to avoid multiple clock domains unless absolutely
+necessary.
+
+## Design
+
+So given the considerations in the previous section I have chosen to use a
+single clock domain of 8Mhz with enable signals corresponding to the positive
+and negative phase of a 1Mhz clock.
+
+The single ported synchronous RAM modules are wrapped so that they act as
+asynchronous RAM that can be independently accessed with the two 1Mhz phases
+enable signals. See
+[rtl/spram.v](https://github.com/markus-zzz/myc64/blob/master/rtl/spram.v) and
+[rtl/sprom.v](https://github.com/markus-zzz/myc64/blob/master/rtl/sprom.v).
+
+A implementation of a very basic VIC-II is started in
+[rtl/vic-ii.v](https://github.com/markus-zzz/myc64/blob/master/rtl/vic-ii.v)
+and likewise for the CIA in
+[rtl/cia.v](https://github.com/markus-zzz/myc64/blob/master/rtl/cia.v).
+
+Everything is wired up and connected to a fake keyboard matrix in
+[rtl/top.v](https://github.com/markus-zzz/myc64/blob/master/rtl/top.v).
+
+
+## Results (so far)
+
+First of all the code for the MyC64 project can be found [here on
+github](https://github.com/markus-zzz/myc64) where the README contains a short
+intruction sequence to get started with the simulator for those interested.
+
+Simulation is Verilator based and the driver program
+[myc64-sim](https://github.com/markus-zzz/myc64/blob/master/sim/c64-sim.cpp) is
+similar to the one used for [my previous RetroCon project]({% post_url
+2019-08-12-retro-gaming-hw-part-1 %}) but with the addition of some nifty
+features to execute delayed commands at a certain frame (e.g. no point
+injecting a key press sequence until the system has finished booting).
+```
+markus@workstation:~/work/repos/myc64/sim$ ./myc64-sim -h
+Usage: ./myc64-sim [OPTIONS]
+
+  --scale=N             -- set pixel scaling
+  --frame-rate=N        -- try to produce a new frame every N ms
+  --save-frame-from=N   -- dump frames to .png starting from frame #N
+  --save-frame-to=N=N   -- dump frames to .png ending with frame #N
+  --save-frame-prefix=S -- prefix dump frame files with S
+  --exit-after-frame=N  -- exit after frame #N
+  --trace               -- create dump.vcd
+  --cmd-load-prg=<FRAME>:<PRG>           -- wait until <FRAME> then load <PRG>
+  --cmd-inject-keys=<FRAME>:<KEYS>       -- wait until <FRAME> then inject <KEYS>
+  --cmd-dump-ram=<FRAME>:<ADDR>:<LENGTH> -- wait until <FRAME> then dump <LENGTH> bytes of RAM starting at <ADDR>
+```
+As an example consider the following command line that starts simulation and
+then waits until video frame #135 before injecting the key sequence for the
+classic one-line BASIC maze generator.
+```
+./myc64-sim --cmd-inject-keys=135:"10<SPACE>PRINT<SPACE>CHR<LSHIFT>4<LSHIFT>8205.5+RND<LSHIFT>81<LSHIFT>9<LSHIFT>9;:GOTO<SPACE>10<RETURN>RUN<RETURN>"
+```
+![C64 boot and one line BASIC maze](/download/c64/basic-maze.apng)
+
+It is also possible to inject an arbitrary `.prg` file into memory and run
+that. E.g. here we take a trivial program that cycles the background color and
+assemble it into a `.prg` file.
+```
+Start:
+loop:  inc $d021
+       jmp loop
+```
+```
+cl65 -o test_001.prg -t c64 -C c64-asm.cfg -u __EXEHDR__ testasm/test_001.s
+```
+It is interesting to note that the `cl65` tool will also insert a small BASIC
+header containing the necessary `SYS <addr>` command so that the assembled
+program can be started with a simple BASIC `RUN` command.
+```
+./myc64-sim --cmd-load-prg=130:test_001.prg --cmd-inject-keys=135:"LIST<RETURN>RUN<RETURN>"
+```
+![C64 cycle bgcolor](/download/c64/cycle-bgcolor.apng)
+
+## Next steps
+
+I am reasonably happy with the result so far given the limited effort put in,
+but of course it does not have to end here, this could evolve in any number of
+different directions. Here are some ideas that come to mind
+
+* Continue making the implementation more complete and exact, e.g. take a game such as [Bubble Bobble](https://www.c64-wiki.com/wiki/Bubble_Bobble) and try to make it play.
+* Get it running on the ULX3S. This would require putting the video frame in SDRAM so that HDMI/DVI can read it at the correct refresh rate for 640x480@60Hz. Also here we could find real use for [the usbdev project]({% post_url 2020-05-16-usb-dev-part-2 %}) to allow key and `.prg` injection from a host PC.
+* Start looking at a SID implementation.
+* Rewrite in [nMigen](https://github.com/m-labs/nmigen). For quite some time now I have been wanting to try out nMigen on a project and this might be a good opportunity.
+
+That is it for this post. If you have questions or feedback - leave a comment below!
