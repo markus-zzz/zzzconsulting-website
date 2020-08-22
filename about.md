@@ -106,7 +106,7 @@ Master's thesis in numerical analysis
 - Retargeting GCC for a DSP architecture (Dept. of Computer Science, Lund University, 2010)
 
 ## Personal interests
-My family and at some previous point in life also hiking, nature, rock
+My family, and at some previous point in life also hiking, nature, rock
 climbing, slacklining, boardsports and natural movement in general.
 
 ## References
