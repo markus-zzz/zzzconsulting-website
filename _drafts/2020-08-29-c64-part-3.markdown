@@ -1,0 +1,152 @@
+---
+layout: post
+title:  "Commodore 64 experiments part-3 (FPGA)"
+math: true
+comments: true
+categories: hardware c64
+---
+I figured the natural next step of our MyC64 journey would be to get the
+emulator running on a FPGA, or more specifically the ULX3S board. Doing so
+requires a few support systems such as keyboard input and visual output to be
+in place so let us use this post to look at how that can be accomplished.
+
+## Keyboard input and control
+
+As we already know the real C64 keyboard is a 8x8 matrix connected directly to
+CIA1 and scanned by the KERNAL code. Any modern keyboard we might find is based
+on scan-codes so some conversion layer (much like what we already do in
+`myc64-sim`) will be necessary.
+
+In addition to keyboard input `.prg` injection also needs to be handled.
+
+A straight forward way to deal with these requirements is to treat the emulator
+as a USB device and develop some kind of software on the host workstation that
+performs the keyboard forwarding and program injection. Additional control
+signaling such as reset/reboot could also be handled this way.
+
+Following this approach would put good use to my [USB
+device](https://github.com/markus-zzz/usbdev/tree/dev) implementation detailed
+in previous posts as well as serving as motivation for thoroughly finalizing it
+and working out remaining bugs.
+
+So let's do that! We simply grab the entire USB device subsystem
+[from github](https://github.com/markus-zzz/usbdev/tree/dev) including controlling
+RISC-V CPU with RAM and ROM.
+
+***Insert SVG of USB device subsystem***
+
+On the workstation software side we need to develop a program that communicates
+with the USB device while maintaining a workable GUI. For the USB communication
+we use [libusb](https://libusb.info/) and for GUI we relay on
+[GTK](https://www.gtk.org/). Combining these two essentially boils down to
+using the asynchronous API of libusb and plugging it in to the single event
+loop handled by GTK.
+
+To be more precise libusb is queried for its (Unix) event file descriptors and
+the GTK event loop is setup to watch these (presumably using the select system
+call internally). Details are found in
+[sw/myc64-keyb.cpp](https://github.com/markus-zzz/myc64/blob/master/sw/myc64-keyb.cpp).
+
+## Video output
+
+Displaying C64 video output in a reasonable way is rather tricky as we need to
+comply with both the internal timing of the VIC-II (to avoid compatibility
+issues with existing software) as well as the timing of the chosen video format for
+a modern display.
+
+Apparently this is not impossible as the [Ultimate
+64](https://ultimate64.com/Ultimate-64) manages to tweak the video timing of
+576p50 to match its VIC-II output (described
+[here](https://1541u-documentation.readthedocs.io/en/latest/hardware/hdmi.html)).
+Details on the 576p50 video mode can be found
+[here](https://ez.analog.com/video/f/q-a/109341/timing-details-of-720x576-progressive-video).
+
+For this project we choose to go a different route and store intermediate
+VIC-II video frames in external SDRAM and display them in 640x480@60Hz over
+DVI/HDMI.
+
+## Audio output
+
+Not much to say about this. The ULX3S features a 4-bit resistor ladder for DAC
+and we simply connect the SID mono output.  Actually 4-bit resolution does not
+sounds as bad as one would think as can be heard in [this comparision
+video](https://www.youtube.com/watch?v=nODn5HJGtAY).
+
+## The MyC64 SoC
+
+Combining these systems in a SoC turns out as follows
+
+![MyC64 SoC](/download/c64/myc64-soc.svg)
+
+As can be seen this involves interaction between several clock domains.
+Especially the visual path, which is rather intense in terms of pixel
+shoveling, uses asynchronos FIFOs when crossing in and out of the SDRAM 125Mhz
+domain.
+
+The components used are gathered from various places
+
+* SDRAM controller - Slightly modified version of the one from [fpga4fun.com](https://www.fpga4fun.com/SDRAM.html).
+* DVI/HDMI controller - From [Project Trellis DVI](https://github.com/daveshah1/prjtrellis-dvi).
+* Asynchronous FIFO - From [here](https://github.com/ZipCPU/website/blob/master/examples/afifo.v). This is a variant of Cliff Cummings design formally verified by Dan Gisselquist. In fact it is the subject of a [Crossing clock domains with an Asynchronous FIFO](https://zipcpu.com/blog/2018/07/06/afifo.html) article by Dan.
+* MyC64-SubSys - That is what we are working on here.
+* UsbDev-SubSys - That is what I was working on before this project.
+
+### Verilator simulation with multiple clock domains
+
+The simulator needed to be extended a bit to handle all the different components
+with their associated clock domains. Regrettably I dragged my feet on this and
+as a result wasted valuable time trying to diagnose what turned out to be
+rather trivial problems while running on the FPGA.
+
+Mostly it is about handling of multiple clock domains in Verilator. Turns out
+that Dan Gisselquist has an excellent article titled [Handling multiple clocks
+with Verilator ](https://zipcpu.com/blog/2018/09/06/tbclock.html) so I went
+ahead and did something similar.
+
+To avoid breaking the video chain we also need to simulate SDRAM so I added a
+very basic SDRAM model to the end of
+[rtl/myc64-soc/myc64-soc-top.v](https://github.com/markus-zzz/myc64/blob/master/rtl/myc64-soc/myc64-soc-top.v).
+
+With all this additional stuff in place simulation with `myc64-soc-sim` is a
+much slower than with our previous `myc64-sim`. So much slower that interactive
+input and display does not make sense any more. Instead the SoC simulator
+stores each video frame directly to the file system in PNG format.
+
+We store video frames directly after the VIC-II output as well as the VGA
+frames that are being fed into the DVI controller. So we store output both
+before and after the error prone SDRAM part.
+
+The SoC simulator `myc64-soc-sim` is implemented in
+[sim/myc64-soc-sim.cpp](https://github.com/markus-zzz/myc64/blob/master/sim/myc64-soc-sim.cpp).
+
+## Demonstration
+
+After loading the design on the ULX3S board and plugging in the secondary USB
+connector we should expect to see the following in `dmesg`
+
+```
+usb 1-5: new low-speed USB device number 6 using xhci_hcd
+usb 1-5: New USB device found, idVendor=abc0, idProduct=0064, bcdDevice= 1.00
+usb 1-5: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+usb 1-5: Product: MyC64 - FPGA based Commodore 64 emulator as a USB device
+usb 1-5: Manufacturer: Markus Lavin (https://www.zzzconsulting.se/)
+usb 1-5: SerialNumber: 0123456789abcdef
+```
+At this point the device should be generating DVI/HDMI output and it is
+advisable to connect a screen to verify. If all looks good we can go ahead and
+connect with `myc64-keyb` and start typing in some BASIC commands. Any key
+press (and release) that goes into the application window will be forwarded to
+the USB connected MyC64 emulator.
+
+The `myc64-keyb` program takes an optional argument that specifies a `.prg`
+file to inject into emulator memory.
+
+An interesting program to try out is the machine language monitor SuperMon by
+[Jim Butterfield](https://en.wikipedia.org/wiki/Jim_Butterfield). SuperMon is
+the monitor used in Jim's classic book [Machine Language for the
+Commodore](https://archive.org/details/Machine_Language_for_the_Commodore_Revised_and_Expanded_Edition).
+To get hold of SuperMon itself in modern times simply go to [Supermon+64
+V1.2](https://github.com/jblang/supermon64). There one can also find a
+[video](https://www.youtube.com/watch?v=MEjnMt_3wkU) demonstrating its
+capabilities.
+
