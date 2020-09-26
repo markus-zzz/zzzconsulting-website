@@ -71,8 +71,8 @@ After that I suggest the following souces for details about the SID
 * [Interview with Bob Yannes](http://sid.kubarth.com/articles/interview_bob_yannes.html)
 
 A very basic implementation based on that was started in
-[rtl/sid.v](https://github.com/markus-zzz/myc64/blob/master/rtl/sid.v). As
-usual it is far from complete but it is able to produce some basic tunes.
+[rtl/myc64/sid.v](https://github.com/markus-zzz/myc64/blob/master/rtl/myc64/sid.v).
+As usual it is far from complete but it is able to produce some basic tunes.
 Modifying `myc64-sim` to store the generated audio signal into a `.wav` file
 allowed us to capture [Bubble Bobble - MyC64
 SID](/download/c64/Bubble_Bobble-MyC64-sim.wav). This admittedly sounds quite a

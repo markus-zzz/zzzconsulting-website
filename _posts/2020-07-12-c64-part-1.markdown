@@ -9,16 +9,17 @@ categories: hardware c64
 When I was a kid back in the 80s my parents bought our family's first computer,
 a Commodore 64 with a datasette station. I still have fond memories of that
 marvelous little machine. At the time though I was only ten years old so my
-mental capacity (and likely also patience) was quite limited and I never
-managed to do much with it besides playing games and typing in the occasional
-BASIC listing from the Sunday newspaper (that almost never worked).
+mental capacity (and likely also patience) was quite limited. I never managed
+to do much with it besides playing games and typing in the occasional BASIC
+listing from the Sunday newspaper. But that almost never worked anyway.
 
 Now in recent times I often find myself watching retro computing episodes from
 the big YouTubers in the field such as [The 8-Bit
 Guy](https://www.youtube.com/user/adric22) and [Retro
 Recipes](https://www.youtube.com/channel/UC6gARF3ICgaLfs3o2znuqXA). Needless to
 say they often feature the C64 and it is refreshing to be reminded of a simpler
-time when things were not complicated to absurdity just for the sake of it.
+time. A time when things were not complicated to absurdity, sometimes
+seemingly, just for the sake of it.
 
 While I know that there are numerous C64 emulators available (mostly in
 software but also a few FPGA based) I always thought that would be a neat
@@ -36,7 +37,7 @@ see how much work would be required to get a system that boots into BASIC.
 
 ## Preparations
 
-Before we can get started we need to gather some preliminary stuff.
+Before we get started it is useful to gather some preliminary materials.
 
 ### Documentation
 
@@ -101,16 +102,16 @@ and negative phase of a 1Mhz clock.
 The single ported synchronous RAM modules are wrapped so that they act as
 asynchronous RAM that can be independently accessed with the two 1Mhz phases
 enable signals. See
-[rtl/spram.v](https://github.com/markus-zzz/myc64/blob/master/rtl/spram.v) and
-[rtl/sprom.v](https://github.com/markus-zzz/myc64/blob/master/rtl/sprom.v).
+[rtl/spram.v](https://github.com/markus-zzz/myc64/blob/master/rtl/myc64/spram.v) and
+[rtl/sprom.v](https://github.com/markus-zzz/myc64/blob/master/rtl/myc64/sprom.v).
 
 A implementation of a very basic VIC-II is started in
-[rtl/vic-ii.v](https://github.com/markus-zzz/myc64/blob/master/rtl/vic-ii.v)
+[rtl/vic-ii.v](https://github.com/markus-zzz/myc64/blob/master/rtl/myc64/vic-ii.v)
 and likewise for the CIA in
-[rtl/cia.v](https://github.com/markus-zzz/myc64/blob/master/rtl/cia.v).
+[rtl/cia.v](https://github.com/markus-zzz/myc64/blob/master/rtl/myc64/cia.v).
 
 Everything is wired up and connected to a fake keyboard matrix in
-[rtl/top.v](https://github.com/markus-zzz/myc64/blob/master/rtl/top.v).
+[rtl/myc64-top.v](https://github.com/markus-zzz/myc64/blob/master/rtl/myc64/myc64-top.v).
 
 
 ## Results (so far)
@@ -120,7 +121,7 @@ github](https://github.com/markus-zzz/myc64) where the README contains a short
 intruction sequence to get started with the simulator for those interested.
 
 Simulation is Verilator based and the driver program
-[myc64-sim](https://github.com/markus-zzz/myc64/blob/master/sim/c64-sim.cpp) is
+[myc64-sim](https://github.com/markus-zzz/myc64/blob/master/sim/myc64-sim.cpp) is
 similar to the one used for [my previous RetroCon project]({% post_url
 2019-08-12-retro-gaming-hw-part-1 %}) but with the addition of some nifty
 features to execute delayed commands at a certain frame (e.g. no point
