@@ -10,18 +10,18 @@ categories: hardware rtl verilog gpu
 
 Putting the MyC64 project on hold for a while.
 
-Recently I have seen updates on the PS1 FPGA core by
-[@Laxer3A](https://twitter.com/laxer3a), which I of course cant help finding
+Recently I have seen updates on the new PS1 FPGA core by
+[@Laxer3A](https://twitter.com/laxer3a), which I of course can't help to find
 interesting. I have never owned a PS1 and honestly never cared much about it
-but it turns out that graphics wise it had have some interesting design
-choices/limitations. More preciecely the graphics pipeline is based around
-fixed point representation so there are no floating point numbers at all.
-Further more there is no z-buffer. Modern Vintage Gamer has put together a
-short video describing these limitations that is well worth a watch as an
-introduction - [Why PlayStation 1 Graphics Warped and Wobbled so much |
+until now.  It turns out that graphics wise it had have some rather interesting
+design choices. More preciecely the graphics pipeline is based around fixed
+point integer representation so there are no floating point numbers involved at
+all.  Further more there is no z-buffer. In fact Modern Vintage Gamer has put
+together a short video describing these limitations that is well worth a watch
+[Why PlayStation 1 Graphics Warped and Wobbled so much |
 MVG](https://www.youtube.com/watch?v=x8TO-nrUtSI).
 
-So apparently it was possible to reach commercial success with a device like
+So apparently it was possible to reach commercial success with a system like
 this some 25 years ago. Nowadays probably not so much but it is still
 interesting to see that one can get away with these limitations and still get
 reasonable results.
@@ -33,8 +33,8 @@ The rasterization algorithm is very well described in [Rasterization: a
 Practical
 Implementation](https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation)
 over at [Scratch Pixel](https://www.scratchapixel.com/). What follows below
-will be some thoughts that I had while reading that and preparing for a design
-that could be put inside a FPGA.
+will be some thoughts that I had while reading that and thinking about a simple
+design that could be put inside a FPGA.
 
 ## Project scope
 
@@ -44,6 +44,8 @@ that could be put inside a FPGA.
 * No z-buffer (geometry has to be sorted before sent down the pipeline)
 
 ## Rasterization stage
+
+*Rasterization is the process of finding pixel coverage for a given triangle*
 
 This stage is about finding out, for a given triangle, what screen pixels are
 covered by that triangle. Since well behaved triangles contain significantly
@@ -100,8 +102,26 @@ This should preferably be done in sequence not to wast too much resources. Once
 the first quad is done the neighbouring quad in $$ x $$ direction is obtained
 by simple addition of the precomputed $$ 2(v_y - u_y) $$ (keeping in mind that
 we get the shift by one for free in hardware by simply hard-wiring in a zero at
-the lsb).
+the lsb). So we begin with sequential computations for the first quad but after
+that we reach a steady state where we evaluate an entire quad each cycle.
 
 Still though every triangle has three edges so evaluating a quad every cycle
 means that 12 adders need to be instantiated. If that results in too high
 resource utilization we may need to cut down a bit.
+
+## First milestone
+
+Rasterize fixed triangle over DVI/HDMI. Use block RAMs for frame buffer.
+Suitable resolution 320x240. Try quad rastierizer and check resource
+utilization in FPGA. If it works then great otherwise scale down.
+
+## Geometry processing
+
+Eventually we could try floating point format for the geometry processing.
+Since geometry processing is not expected to be a bottleneck compared to pixel
+rasterization one can probably afford a completely sequential implementation
+and hence floating point is within reach. Also the dynamic range of floating
+point makes more sense when it comes to vertices compared to pixel coordinates
+in raster space (which are inherently integer).
+
+[Computer aritmetic appendix from Computer Architecture: A Quantitative Approach](https://www.cs.ucf.edu/~dcm/Teaching/CDA5106-Fall2015/Appendices/appendix_j.pdf)
