@@ -1,11 +1,16 @@
 ---
 layout: post
-title:  "A most basic GPU - part 1"
+title:  "[DRAFT] A most basic GPU - part 1"
 math: true
 mermaid: true
 comments: true
 categories: hardware rtl verilog gpu
 ---
+
+**NOTE: This post is not finished yet but instead of keeping it as a hidden
+draft I have decided to publish it anyway. Right now I am not working on this
+project but if/when I return I will try to update the post with the progress.**
+
 ## Introduction
 
 Putting the MyC64 project on hold for a while.
