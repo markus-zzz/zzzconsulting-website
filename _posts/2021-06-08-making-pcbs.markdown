@@ -175,4 +175,33 @@ needed. Actually the FTDI chips are really expensive (same cost as the ECP5
 12F) so while it may be useful for the development version of the board it will
 not go on any production variant.
 
+In fact since FTDI appears to be a generally unlikable company it would be a
+good thing to try to not use their products at all. So instead of putting an
+overpriced FTDI chip on each board let us use an external JTAG cable for
+programming and only put a JTAG pin-header on the PCB (with pull-down on TCK
+but nothing else). Once the board has been "factory" programmed via JTAG
+subsequent updates could be handled via the USB interface.  During FPGA power
+up the configuration bitstream is read from the SPI flash but after that the
+SPI interface pins are controllable by the FPGA fabric (according to
+documentation). So in theory once our FPGA core is up and running we can
+receive a new configuration bitstream via our USB interface and then write that
+to the SPI flash so that it will be used during the following FPGA power up
+sequence.
 
+#### PCB manufacturing
+
+The chosen ECP5 BGA package is 0.8mm pitch so in order to escape route the
+inner rings (mostly power and gnd) rather small vias need to be placed (via
+diameter needs to be less than 0.55mm). Unfortunately it turns out that making
+such small vias exceeds the capabilities of Aisler so a different PCB service
+needs to be used. Luckily these vias are just within the capabilites of the
+Oshpark so we have to turn to them instead.
+
+When it comes to PCB service the order of preference for me would be  Aisler
+(Europe), Oshpark (US), JLCPCB and PCBWAY (China).
+
+#### PCB layout
+
+Thinking that we can mount the switch mode voltage regulators and support
+circuitry on the back side of the board. Also if possible decoupling capacitors
+for the BGA can go on the back side as well.
