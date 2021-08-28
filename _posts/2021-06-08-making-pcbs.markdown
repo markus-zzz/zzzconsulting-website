@@ -90,6 +90,20 @@ list below and report the results.
 * <https://1bitsquared.com/products/pmod-hyperram>
 * <https://www.youtube.com/watch?v=dThZDl-QG5s>
 
+I did a second try run using the stencil after having acquired
+<https://www.oshstencils.com/> excellent PCB fixture jig. To me having the
+board properly held in place by jig helped a lot when applying the paste. Of
+course one can get a similar effect using a few scrap PCBs but I don't really
+have many of those lying around that are the right size and besides these
+brackets just cost a few dollars.
+
+As far as I can tell the stencil alignment and paste coverage turned out well
+and the end result looks good. So with this I feel reasonably confident that I
+will also be able to handle the larger FPGA BGA with its 0.8mm pitch (the
+HyperRAM BGA has a 1.0mm pitch). Again I still have not gotten around to
+actually verify that these modules work so maybe I should not say too much.
+
+![HyperRAM BGA second attempt](/download/pcb/hyperram-bga-pcb-2.jpg)
 
 ### Stage 2 - MAX9850
 2-layer board.
@@ -194,10 +208,10 @@ The chosen ECP5 BGA package is 0.8mm pitch so in order to escape route the
 inner rings (mostly power and gnd) rather small vias need to be placed (via
 diameter needs to be less than 0.55mm). Unfortunately it turns out that making
 such small vias exceeds the capabilities of Aisler so a different PCB service
-needs to be used. Luckily these vias are just within the capabilites of the
-Oshpark so we have to turn to them instead.
+needs to be used. These vias are just within the capabilites of the Oshpark so
+we have to turn to them instead.
 
-When it comes to PCB service the order of preference for me would be  Aisler
+When it comes to PCB services the order of preference for me would be Aisler
 (Europe), Oshpark (US), JLCPCB and PCBWAY (China).
 
 #### PCB layout
