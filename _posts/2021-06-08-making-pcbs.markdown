@@ -105,13 +105,49 @@ actually verify that these modules work so maybe I should not say too much.
 
 ![HyperRAM BGA second attempt](/download/pcb/hyperram-bga-pcb-2.jpg)
 
+
+##### Verification
+
+Now a few monhts later I felt sufficiently energized to have a go at testing
+the HyperRAM boards.  I set up [a test
+bench](https://github.com/markus-zzz/hyperram-test) using [the portable
+HyperRAM controller from
+blackmesalabs](https://github.com/blackmesalabs/hyperram) and the
+[PicoRV32](https://github.com/YosysHQ/picorv32) RISC-V CPU core.
+
+The DRAM is mapped into the CPU's address space presenting its 8MB as 2M 32-bit
+dwords.
+
+The test consists of having the CPU write the Fibonacci sequence, as 32-bit
+integers, to memory and then verifying that it reads back correctly. Test
+result is presented by lighting the appropriate LEDs.
+
+So far only one (of three) boards have been fully assembled but this complete
+board does pass the test which is very good news to me.
+
+It should be noted that this is a basic test running the memory at a low
+frequency (6.25MHz) so it does not stress test the board in any way. It does
+however provide some confidence in that the part survived the assembly process,
+the solder joints are reasonably sound and that there is no bridging.
+
+![Testing the HyperRAM board](/download/pcb/hyperram-test-pcb.jpg)
+
+
 ### Stage 2 - MAX9850
 2-layer board.
 
-Still have not decided if I will do an audio board but this seems like a nice
-DAC.
+I also got started designing an audio extension board featuring the
+[MAX9850](https://www.maximintegrated.com/en/products/analog/audio/MAX9850.html)
+stereo audio DAC with builtin headphone amplifier.
 
-* <https://www.maximintegrated.com/en/products/analog/audio/MAX9850.html>
+Now the MAX9850 part comes in TQFN-28 which is an absolutely tiny package with
+0.5mm pitch (KiCad footprint is TQFN-28-1EP_5x5mm_P0.5mm_EP3.25x3.25mm) so
+assembly will be challenging.
+
+This is what PCB layout currently looks like. To be sent to fabrication
+(Aisler) in the coming days.
+
+![PCB layout](/download/pcb/dac-layout.png)
 
 ### Stage 3 - ECP5
 4-layer board (signal, power, gnd, signal).
