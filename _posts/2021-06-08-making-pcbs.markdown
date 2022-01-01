@@ -149,6 +149,8 @@ This is what PCB layout currently looks like. To be sent to fabrication
 
 ![PCB layout](/download/pcb/dac-layout.png)
 
+[KiCAD project files](https://github.com/markus-zzz/mydacboard).
+
 ### Stage 3 - ECP5
 4-layer board (signal, power, gnd, signal).
 
