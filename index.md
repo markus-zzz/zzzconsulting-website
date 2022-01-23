@@ -8,13 +8,11 @@ layout: home
 # Hello and welcome!
 
 My name is Markus Lavin and I am a software engineer who is located and active
-in the very south of Sweden. I intend to use this site to publish occasional
-blog posts relating to the following fields:
-
-- Compiler engineering
-- Graphics and game programming
-- Embedded computing
+in the very south of Sweden. I originally intended to use this site to market
+myself as a consultant but that ambition has since long been put on the shelf.
+Instead I now use this platform to write blog posts about various projects that
+I work on.
 
 The reasoning behind this effort is a combination of self promotion (hopefully)
-and keeping an open notebook for myself that additionally may be to the benefit
-of others.
+as well as keeping an open notebook for myself that additionally may be to the
+benefit of others.

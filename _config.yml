@@ -16,8 +16,8 @@
 title: ZZZ-Consulting
 email: firstname.lastname@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Consulting services offered in the fields of Compiler engineering, Graphics
-  programming and Embedded computing.
+  Me writing blog posts about various topics I find interesting. Turns out
+  these are mostly FPGA and retro-computing related.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://www.zzzconsulting.se" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  markus-zzz
